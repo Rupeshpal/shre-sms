@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\V1\AuthController as AuthV1Controller;
 use App\Http\Controllers\Api\V1\EventController;
@@ -17,6 +16,17 @@ use App\Http\Controllers\Api\V1\Teacher\TeacherBankDetailController;
 use App\Http\Controllers\Api\V1\Teacher\TeacherLeaveInfoController;
 use App\Http\Controllers\Api\V1\Teacher\TeacherAttendanceController;
 use App\Http\Controllers\Api\V1\Teacher\TeacherLeaveRequestController;
+use App\Http\Controllers\Api\V1\Parent\ParentController;
+use App\Http\Controllers\Api\V1\AcademicYearController;
+use App\Http\Controllers\Api\V1\Student\StudentPersonalInfoController;
+use App\Http\Controllers\Api\V1\Student\StudentFatherInfoController;
+use App\Http\Controllers\Api\V1\Student\StudentMotherInfoController;
+use App\Http\Controllers\Api\V1\Student\StudentGuardianInfoController;
+use App\Http\Controllers\Api\V1\Student\StudentSiblingController;
+use App\Http\Controllers\Api\V1\Student\StudentAddressController;
+use App\Http\Controllers\Api\V1\Student\StudentTransportController;
+use App\Http\Controllers\Api\V1\Student\PreviousSchoolDetailController;
+use App\Http\Controllers\Api\V1\Student\StudentLeaveRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,7 +42,7 @@ use App\Http\Controllers\Api\V1\Teacher\TeacherLeaveRequestController;
 
 Route::prefix('v1')->group(function () {
 
-    Route::post('/register', [AuthV1Controller::class, 'register']);
+    Route::post('/register', action: [AuthV1Controller::class, 'register']);
     Route::post('/login',    [AuthV1Controller::class, 'login']);
 
     Route::middleware('auth:sanctum')->group(callback: function () {
@@ -55,7 +65,17 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('teacher-leave-infos', TeacherLeaveInfoController::class);
         Route::apiResource('teacher-attendances', TeacherAttendanceController::class);
         Route::apiResource('teacher-leave-requests', TeacherLeaveRequestController::class);
-
+        Route::apiResource('parents', ParentController::class);
+        Route::apiResource('academic-years', AcademicYearController::class);
+        Route::apiResource('student-personal-info', StudentPersonalInfoController::class);
+        Route::apiResource('student-father-info', StudentFatherInfoController::class);
+        Route::apiResource('student-mother-info', StudentMotherInfoController::class);
+        Route::apiResource('student-guardian-info', StudentGuardianInfoController::class);
+        Route::apiResource('student-siblings', StudentSiblingController::class);
+        Route::apiResource('student-transports', StudentTransportController::class);
+        Route::apiResource('student-addresses', StudentAddressController::class);
+        Route::apiResource('previous-school-details', PreviousSchoolDetailController::class);
+       Route::apiResource('student-leave-requests', StudentLeaveRequestController::class);
 
     });
 });
