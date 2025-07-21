@@ -27,6 +27,8 @@ use App\Http\Controllers\Api\V1\Student\StudentAddressController;
 use App\Http\Controllers\Api\V1\Student\StudentTransportController;
 use App\Http\Controllers\Api\V1\Student\PreviousSchoolDetailController;
 use App\Http\Controllers\Api\V1\Student\StudentLeaveRequestController;
+use App\Http\Controllers\Api\V1\Exam\ExamResultController;
+use App\Http\Controllers\Exam\ExamAttendanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,7 +77,10 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('student-transports', StudentTransportController::class);
         Route::apiResource('student-addresses', StudentAddressController::class);
         Route::apiResource('previous-school-details', PreviousSchoolDetailController::class);
-       Route::apiResource('student-leave-requests', StudentLeaveRequestController::class);
+        Route::apiResource('student-leave-requests', StudentLeaveRequestController::class);
+        Route::apiResource('exams', \App\Http\Controllers\Api\V1\Exam\ExamController::class);
+        Route::apiResource('exam-results', ExamResultController::class);
+        Route::apiResource('exam-attendances', ExamAttendanceController::class);
 
     });
 });
