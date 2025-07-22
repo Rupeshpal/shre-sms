@@ -1,7 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Exam;
-
+namespace App\Http\Controllers\Api\V1\Exam;
 use App\Http\Controllers\Controller;
 use App\Models\Exam\ExamAttendance;
 use Illuminate\Http\Request;
@@ -17,7 +16,6 @@ class ExamAttendanceController extends Controller
     {
         try {
             $validated = $request->validate([
-                'admissionNo' => 'required|string|unique:exam_attendances,admissionNo',
                 'rollNo' => 'nullable|string',
                 'class' => 'nullable|string',
                 'section' => 'nullable|string',

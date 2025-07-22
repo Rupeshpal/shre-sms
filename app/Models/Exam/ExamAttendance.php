@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Models\Exam;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -9,13 +7,12 @@ class ExamAttendance extends Model
 {
     use HasFactory;
 
-    protected $table = 'exam_attendances';
-    protected $primaryKey = 'admissionNo';
+    protected $table = 'exam_attendance';
+    protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
 
     protected $fillable = [
-        'admissionNo',
         'rollNo',
         'class',
         'section',

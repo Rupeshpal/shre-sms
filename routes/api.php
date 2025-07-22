@@ -28,7 +28,9 @@ use App\Http\Controllers\Api\V1\Student\StudentTransportController;
 use App\Http\Controllers\Api\V1\Student\PreviousSchoolDetailController;
 use App\Http\Controllers\Api\V1\Student\StudentLeaveRequestController;
 use App\Http\Controllers\Api\V1\Exam\ExamResultController;
-use App\Http\Controllers\Exam\ExamAttendanceController;
+use App\Http\Controllers\Api\V1\Exam\ExamAttendanceController;
+use App\Http\Controllers\Api\V1\Exam\TestResultController;
+use App\Http\Controllers\Api\V1\Exam\TestResultSubjectController;
 
 /*
 |--------------------------------------------------------------------------
@@ -81,6 +83,9 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('exams', \App\Http\Controllers\Api\V1\Exam\ExamController::class);
         Route::apiResource('exam-results', ExamResultController::class);
         Route::apiResource('exam-attendances', ExamAttendanceController::class);
+        Route::apiResource('exam-stats', App\Http\Controllers\Api\V1\Exam\ExamStatController::class);
+        Route::apiResource('test-results', TestResultController::class);
+        Route::apiResource('test-result-subjects', TestResultSubjectController::class);
 
     });
 });
