@@ -25,9 +25,8 @@ class SectionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'id'            => 'required|string|unique:sections',
             'section_name'  => 'required|string|max:255',
-            'status'        => 'nullable|in:0,1',
+            'status'        => 'nullable|boolean',
         ]);
 
         $section = Section::create($validated);
@@ -44,12 +43,12 @@ class SectionController extends Controller
 
         $validated = $request->validate([
             'section_name'  => 'sometimes|required|string|max:255',
-            'status'        => 'nullable|in:0,1',
+            'status'        => 'nullable|boolean',
         ]);
 
         $section->update($validated);
 
-        return response()->json($section);
+        return response()->json(data: $section);
     }
 
     public function destroy($id)

@@ -14,7 +14,7 @@ class Section extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'id',
+
         'section_name',
         'status',
     ];

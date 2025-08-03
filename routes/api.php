@@ -1,6 +1,6 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\V1\AuthController as AuthV1Controller;
+use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\NoticeController;
 use App\Http\Controllers\Api\V1\EventCalendarController;
@@ -31,6 +31,8 @@ use App\Http\Controllers\Api\V1\Exam\ExamResultController;
 use App\Http\Controllers\Api\V1\Exam\ExamAttendanceController;
 use App\Http\Controllers\Api\V1\Exam\TestResultController;
 use App\Http\Controllers\Api\V1\Exam\TestResultSubjectController;
+use App\Http\Controllers\Api\V1\Student\StudentDocumentController;
+use App\Http\Controllers\Api\V1\Student\StudentRelationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,14 +48,13 @@ use App\Http\Controllers\Api\V1\Exam\TestResultSubjectController;
 
 Route::prefix('v1')->group(function () {
 
-    Route::post('/register', action: [AuthV1Controller::class, 'register']);
-    Route::post('/login',    [AuthV1Controller::class, 'login']);
+    Route::post('/register', action: [AuthController::class, 'register']);
+    Route::post('/login',    [AuthController::class, 'login']);
 
     Route::middleware('auth:sanctum')->group(callback: function () {
-        Route::post('/logout', [AuthV1Controller::class, 'logout']);
-        Route::get('/me',      [AuthV1Controller::class, 'me']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me',      [AuthController::class, 'me']);
 
-        // Resource routes
         Route::apiResource('events',               EventController::class);
         Route::apiResource('notices',              NoticeController::class);
         Route::apiResource('event-calendar',       EventCalendarController::class);
@@ -86,6 +87,8 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('exam-stats', App\Http\Controllers\Api\V1\Exam\ExamStatController::class);
         Route::apiResource('test-results', TestResultController::class);
         Route::apiResource('test-result-subjects', TestResultSubjectController::class);
+        Route::apiResource('student-documents', StudentDocumentController::class);
+        Route::apiResource('student-relations', StudentRelationController::class);
 
     });
 });

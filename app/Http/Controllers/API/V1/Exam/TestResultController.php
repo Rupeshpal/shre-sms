@@ -18,7 +18,7 @@ class TestResultController extends Controller
         try {
             $validated = $request->validate([
                 'testName'        => 'nullable|string',
-                'status'          => 'nullable|string',
+                'status' => 'nullable|boolean',
                 'rank'            => 'nullable|integer',
                 'totalMarks'      => 'nullable|integer',
                 'passMarks'       => 'nullable|integer',
@@ -55,7 +55,7 @@ class TestResultController extends Controller
 
         $validated = $request->validate([
             'testName'        => 'nullable|string',
-            'status'          => 'nullable|string',
+            'status'          => 'nullable|boolean',
             'rank'            => 'nullable|integer',
             'totalMarks'      => 'nullable|integer',
             'passMarks'       => 'nullable|integer',

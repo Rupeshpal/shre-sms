@@ -22,23 +22,45 @@ class SubjectController extends Controller
         return response()->json($subject);
     }
 
-    public function store(Request $request)
-    {
+  public function store(Request $request)
+{
+    try {
         $validated = $request->validate([
             'name'                 => 'required|string|max:100',
-            'code'                 => 'required|string|max:20|unique:subjects',
+            'code'                 => 'required|string|max:20',
             'type'                 => 'required|in:Theory,Practical,Both',
             'full_mark_theory'     => 'nullable|integer',
             'full_mark_practical'  => 'nullable|integer',
             'pass_mark_theory'     => 'nullable|integer',
             'pass_mark_practical'  => 'nullable|integer',
-            'status'               => 'nullable|integer',
+            'status'               => 'nullable|boolean',
         ]);
+
+        if (Subject::where('code', $validated['code'])->exists()) {
+            $validated['code'] .= '_' . uniqid();
+        }
 
         $subject = Subject::create($validated);
 
-        return response()->json($subject, 201);
+        return response()->json([
+            'message' => 'Subject created successfully',
+            'data'    => $subject
+        ], 201);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors'  => $e->errors()
+        ], 422);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Unexpected error occurred',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function update(Request $request, $id)
     {
@@ -55,7 +77,7 @@ class SubjectController extends Controller
             'full_mark_practical'  => 'nullable|integer',
             'pass_mark_theory'     => 'nullable|integer',
             'pass_mark_practical'  => 'nullable|integer',
-            'status'               => 'nullable|integer',
+            'status'               => 'nullable|boolean',
         ]);
 
         $subject->update($validated);

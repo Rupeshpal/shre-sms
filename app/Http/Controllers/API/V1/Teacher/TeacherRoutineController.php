@@ -1,11 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1\Teacher;
+
 use App\Http\Controllers\Controller;
 use App\Models\Teacher\TeacherRoutine;
 use Illuminate\Http\Request;
-use Exception;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
+use Exception;
 
 class TeacherRoutineController extends Controller
 {
@@ -15,7 +17,10 @@ class TeacherRoutineController extends Controller
             $routines = TeacherRoutine::all();
             return response()->json($routines, 200);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Failed to fetch routines', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Failed to fetch routines',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -28,7 +33,10 @@ class TeacherRoutineController extends Controller
             }
             return response()->json($routine, 200);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error fetching routine', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error fetching routine',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -48,19 +56,25 @@ class TeacherRoutineController extends Controller
 
             $routine = TeacherRoutine::create($validated);
 
-            if (! $routine) {
-                return response()->json(['message' => 'Routine could not be created'], 500);
-            }
-
             return response()->json([
                 'message' => 'Routine created successfully',
-                'routine' => $routine,
+                'routine' => $routine
             ], 201);
-
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $e->errors()
+            ], 422);
         } catch (QueryException $e) {
-            return response()->json(['message' => 'Database error', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Database error',
+                'error'   => $e->getMessage()
+            ], 500);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error creating routine', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Unexpected error',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -83,21 +97,27 @@ class TeacherRoutineController extends Controller
                 'room'         => 'nullable|string|max:50',
             ]);
 
-            $updated = $routine->update($validated);
-
-            if (! $updated) {
-                return response()->json(['message' => 'Routine could not be updated'], 500);
-            }
+            $routine->update($validated);
 
             return response()->json([
                 'message' => 'Routine updated successfully',
                 'routine' => $routine
             ], 200);
-
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $e->errors()
+            ], 422);
         } catch (QueryException $e) {
-            return response()->json(['message' => 'Database error', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Database error',
+                'error'   => $e->getMessage()
+            ], 500);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error updating routine', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Unexpected error',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -109,18 +129,19 @@ class TeacherRoutineController extends Controller
                 return response()->json(['message' => 'Routine not found'], 404);
             }
 
-            $deleted = $routine->delete();
-
-            if (! $deleted) {
-                return response()->json(['message' => 'Routine could not be deleted'], 500);
-            }
+            $routine->delete();
 
             return response()->json(['message' => 'Routine deleted successfully'], 200);
-
         } catch (QueryException $e) {
-            return response()->json(['message' => 'Database error', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Database error',
+                'error'   => $e->getMessage()
+            ], 500);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Error deleting routine', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Unexpected error',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 }

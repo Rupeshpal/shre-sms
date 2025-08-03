@@ -92,6 +92,6 @@ class StudentPersonalInfoController extends Controller
 
         $student->delete();
 
-        return response()->json(['message' => 'Student personal info deleted successfully']);
+        return response()->json(data: ['message' => 'Student personal info deleted successfully']);
     }
 }
