@@ -1,0 +1,35 @@
+name: FTP Deploy Laravel Project
+
+on:
+  push:
+    branches:
+      - main  # or master
+
+jobs:
+  ftp-deploy:
+    name: 🚀 Deploy via FTP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: ⛔ Remove unnecessary files
+        run: |
+          rm -rf .git
+          rm -rf node_modules
+          rm -f .env
+
+      - name: 📤 FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: shreeja.al-ibtikar.com
+          username: shreejaapi@shreeja.al-ibtikar.com
+          password: Rupesh#@121
+          server-dir: ./
+          exclude: |
+            **/.env
+            **/node_modules/**
+            **/.gitignore
+            **/.github/**
+            **/storage/logs/**
