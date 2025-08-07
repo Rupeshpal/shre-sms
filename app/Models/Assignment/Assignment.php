@@ -23,6 +23,13 @@ class Assignment extends Model
         'attachment',
     ];
 
+    protected $casts = [
+    'due_date' => 'datetime',
+    'teacher_id' => 'integer',
+    'subject_id' => 'integer',
+    'section_id' => 'integer',
+    'class_id' => 'integer',
+    ];
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);

@@ -9,6 +9,14 @@ class TestResult extends Model
 {
     use HasFactory;
 
+    protected $table = 'test_results';
+    protected $primaryKey = 'id';
+
+    public $timestamps = true;
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
     protected $fillable = [
         'testName',
         'status',

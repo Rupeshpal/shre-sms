@@ -6,6 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 class AcademicYear extends Model
 {
     use HasFactory;
+    protected $table = 'academic_years';
+    protected $cast = [
+        'start_date' => 'datetime',
+        'status' => 'boolean',
+        'current_academic_year' => 'boolean',
+        'end_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     protected $fillable = [
         'academic_year',

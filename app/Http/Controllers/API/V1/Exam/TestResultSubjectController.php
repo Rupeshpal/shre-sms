@@ -10,7 +10,11 @@ class TestResultSubjectController extends Controller
 {
     public function index()
     {
-        return response()->json(TestResultSubject::all());
+        $subjects = TestResultSubject::with('testResult')->get();
+
+        return response()->json([
+            'data' => $subjects->map(fn ($subject) => $this->formatResponse($subject))
+        ]);
     }
 
     public function store(Request $request)
@@ -29,25 +33,33 @@ class TestResultSubjectController extends Controller
 
             return response()->json([
                 'message' => 'Subject added successfully',
-                'data'    => $subject
+                'data'    => $this->formatResponse($subject->load('testResult')),
             ], 201);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error saving data', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error saving data',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
     }
 
     public function show($id)
     {
-        $subject = TestResultSubject::find($id);
+        $subject = TestResultSubject::with('testResult')->find($id);
+
         if (!$subject) {
             return response()->json(['message' => 'Subject not found'], 404);
         }
-        return response()->json($subject);
+
+        return response()->json([
+            'data' => $this->formatResponse($subject)
+        ]);
     }
 
     public function update(Request $request, $id)
     {
         $subject = TestResultSubject::find($id);
+
         if (!$subject) {
             return response()->json(['message' => 'Subject not found'], 404);
         }
@@ -65,18 +77,36 @@ class TestResultSubjectController extends Controller
 
         return response()->json([
             'message' => 'Subject updated successfully',
-            'data'    => $subject
+            'data'    => $this->formatResponse($subject->load('testResult')),
         ]);
     }
 
     public function destroy($id)
     {
         $subject = TestResultSubject::find($id);
+
         if (!$subject) {
             return response()->json(['message' => 'Subject not found'], 404);
         }
+
         $subject->delete();
 
         return response()->json(['message' => 'Subject deleted successfully']);
+    }
+
+    private function formatResponse($subject)
+    {
+        return [
+            'id'             => $subject->id,
+            'testResultId'   => (int) $subject->testResultId,
+            'testResultName' => optional($subject->testResult)->testName,
+            'name'           => $subject->name,
+            'fullMarks'      => (int) $subject->fullMarks,
+            'passMarks'      => (int) $subject->passMarks,
+            'obtainedMarks'  => (int) $subject->obtainedMarks,
+            'result'         => $subject->result,
+            'createdAt'      => optional($subject->created_at)->toIso8601String(),
+            'updatedAt'      => optional($subject->updated_at)->toIso8601String(),
+        ];
     }
 }

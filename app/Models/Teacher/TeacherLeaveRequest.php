@@ -29,4 +29,11 @@ class TeacherLeaveRequest extends Model
     {
         return $this->belongsTo(User::class, 'approver_id');
     }
+    /**
+     * Get the teacher for this leave request.
+     */
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class, 'teacher_id');
+    }
 }

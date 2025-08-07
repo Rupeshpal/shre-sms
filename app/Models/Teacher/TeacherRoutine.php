@@ -9,9 +9,10 @@ class TeacherRoutine extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'routine_id';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'teacher_id',
         'section_id',
         'subject_id',

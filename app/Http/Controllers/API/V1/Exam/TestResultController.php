@@ -10,75 +10,102 @@ class TestResultController extends Controller
 {
     public function index()
     {
-        return response()->json(TestResult::all());
+        $results = TestResult::all();
+
+        return response()->json([
+            'data' => $results->map(fn ($result) => $this->formatResponse($result))->values()
+        ]);
     }
 
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
-                'testName'        => 'nullable|string',
-                'status' => 'nullable|boolean',
-                'rank'            => 'nullable|integer',
-                'totalMarks'      => 'nullable|integer',
-                'passMarks'       => 'nullable|integer',
-                'obtainedMarks'   => 'nullable|integer',
-                'passPercentage'  => 'nullable|integer',
+                'testName'       => 'required|string',
+                'status'         => 'required|boolean',
+                'rank'           => 'required|integer',
+                'totalMarks'     => 'required|integer',
+                'passMarks'      => 'required|integer',
+                'obtainedMarks'  => 'required|integer',
+                'passPercentage' => 'required|integer',
             ]);
 
-            $result = TestResult::create($validated);
+            $result = TestResult::create($validated)->fresh();
 
             return response()->json([
                 'message' => 'Test result created successfully',
-                'data'    => $result,
+                'data'    => $this->formatResponse($result),
             ], 201);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error saving data', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => 'Error saving data',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
     }
 
     public function show($id)
     {
         $result = TestResult::find($id);
-        if (!$result) {
+        if (! $result) {
             return response()->json(['message' => 'Test result not found'], 404);
         }
-        return response()->json($result);
+
+        return response()->json([
+            'data' => $this->formatResponse($result)
+        ]);
     }
 
     public function update(Request $request, $id)
     {
         $result = TestResult::find($id);
-        if (!$result) {
+        if (! $result) {
             return response()->json(['message' => 'Test result not found'], 404);
         }
 
         $validated = $request->validate([
-            'testName'        => 'nullable|string',
-            'status'          => 'nullable|boolean',
-            'rank'            => 'nullable|integer',
-            'totalMarks'      => 'nullable|integer',
-            'passMarks'       => 'nullable|integer',
-            'obtainedMarks'   => 'nullable|integer',
-            'passPercentage'  => 'nullable|integer',
+            'testName'       => 'required|string',
+            'status'         => 'required|boolean',
+            'rank'           => 'required|integer',
+            'totalMarks'     => 'required|integer',
+            'passMarks'      => 'required|integer',
+            'obtainedMarks'  => 'required|integer',
+            'passPercentage' => 'required|integer',
         ]);
 
         $result->update($validated);
 
         return response()->json([
             'message' => 'Test result updated successfully',
-            'data'    => $result,
+            'data'    => $this->formatResponse($result->fresh()),
         ]);
     }
 
     public function destroy($id)
     {
         $result = TestResult::find($id);
-        if (!$result) {
+        if (! $result) {
             return response()->json(['message' => 'Test result not found'], 404);
         }
+
         $result->delete();
 
         return response()->json(['message' => 'Test result deleted successfully']);
+    }
+
+    protected function formatResponse($result)
+    {
+        return [
+            'id'             => $result->id,
+            'testName'       => $result->testName,
+            'status'         => (bool) $result->status,
+            'rank'           => $result->rank,
+            'totalMarks'     => $result->totalMarks,
+            'passMarks'      => $result->passMarks,
+            'obtainedMarks'  => $result->obtainedMarks,
+            'passPercentage' => $result->passPercentage,
+            'createdAt'      => optional($result->created_at)->toIso8601String(),
+            'updatedAt'      => optional($result->updated_at)->toIso8601String(),
+        ];
     }
 }

@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    public function up(): void
+    {
+    Schema::create('exam_attendance', function (Blueprint $table) {
+    $table->string('id')->primary();
+    $table->string('rollNo');
+
+    $table->unsignedBigInteger('class_id');
+    $table->unsignedBigInteger('section_id');
+    $table->unsignedBigInteger('student_id');
+
+    $table->float('science')->nullable();
+    $table->float('chemistry')->nullable();
+    $table->float('math')->nullable();
+    $table->float('social')->nullable();
+
+    $table->foreign('class_id')->references('id')->on('classes')->onDelete('cascade');
+    $table->foreign('section_id')->references('id')->on('sections')->onDelete('cascade');
+    $table->foreign('student_id')->references('id')->on('student_personal_info')->onDelete('cascade');
+});
+
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('exam_attendance');
+    }
+};

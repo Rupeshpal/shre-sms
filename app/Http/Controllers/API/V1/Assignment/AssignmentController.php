@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Assignment;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assignment\Assignment;
+use App\Http\Resources\Assignment\AssignmentResource;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -12,23 +13,26 @@ class AssignmentController extends Controller
     public function index()
     {
         try {
-            return response()->json(Assignment::all());
+            $assignments = Assignment::with(['teacher', 'subject', 'section', 'class'])->get();
+            return AssignmentResource::collection($assignments);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to load assignments',
                 'error' => $e->getMessage()
-            ], 500);
+            ], status: 500);
         }
     }
 
     public function show($id)
     {
         try {
-            $assignment = Assignment::find($id);
+            $assignment = Assignment::with(['teacher', 'subject', 'section', 'class'])->find($id);
+
             if (! $assignment) {
                 return response()->json(['message' => 'Assignment not found'], 404);
             }
-            return response()->json($assignment);
+
+            return new AssignmentResource($assignment);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to load assignment',
@@ -37,38 +41,51 @@ class AssignmentController extends Controller
         }
     }
 
-    public function store(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'title'        => 'required|string|max:255',
-                'description'  => 'required|string',
-                'teacher_id'   => 'required|exists:teachers,id',
-                'subject_id'   => 'required|exists:subjects,id',
-                'section_id'   => 'required|exists:sections,id',
-                'class_id'     => 'required|exists:classes,id',
-                'due_date'     => 'required|date',
-                'attachment'   => 'nullable|string|max:255',
-            ]);
+ public function store(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'required|string',
+            'teacherId'   => 'required|exists:teachers,id',
+            'subjectId'   => 'required|exists:subjects,id',
+            'sectionId'   => 'required|exists:sections,id',
+            'classId'     => 'required|exists:classes,id',
+            'dueDate'     => 'required|date',
+            'attachment'  => 'nullable|string|max:255',
+        ]);
 
-            $assignment = Assignment::create($validated);
+        $data = [
+            'title'       => $validated['title'],
+            'description' => $validated['description'],
+            'teacher_id'  => $validated['teacherId'],
+            'subject_id'  => $validated['subjectId'],
+            'section_id'  => $validated['sectionId'],
+            'class_id'    => $validated['classId'],
+            'due_date'    => $validated['dueDate'],
+            'attachment'  => $validated['attachment'] ?? null,
+        ];
 
-            return response()->json([
-                'message' => 'Assignment created successfully',
-                'data' => $assignment
-            ], 201);
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors'  => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Unexpected error',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
+        $assignment = Assignment::create($data);
+        $assignment->load(['teacher', 'subject', 'section', 'class']);
+
+        return response()->json([
+            'message' => 'Assignment created successfully',
+            'data'    => new AssignmentResource($assignment)
+        ], 201);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors'  => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Unexpected error',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+}
+
 
     public function update(Request $request, $id)
     {
@@ -90,10 +107,11 @@ class AssignmentController extends Controller
             ]);
 
             $assignment->update($validated);
+            $assignment->load(['teacher', 'subject', 'section', 'class']);
 
             return response()->json([
                 'message' => 'Assignment updated successfully',
-                'data' => $assignment
+                'data'    => new AssignmentResource($assignment)
             ]);
         } catch (ValidationException $e) {
             return response()->json([

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1\Exam;
+
 use App\Http\Controllers\Controller;
 use App\Models\Exam\ExamStat;
 use Illuminate\Http\Request;
@@ -9,7 +10,11 @@ class ExamStatController extends Controller
 {
     public function index()
     {
-        return response()->json(ExamStat::all());
+        $stats = ExamStat::all();
+
+        return response()->json([
+            'data' => $stats->map(fn ($stat) => $this->formatResponse($stat))
+        ]);
     }
 
     public function store(Request $request)
@@ -24,12 +29,12 @@ class ExamStatController extends Controller
 
             return response()->json([
                 'message' => 'Exam stat created successfully',
-                'data' => $stat
+                'data'    => $this->formatResponse($stat)
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error saving data',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
@@ -37,17 +42,22 @@ class ExamStatController extends Controller
     public function show($id)
     {
         $stat = ExamStat::find($id);
-        if (!$stat) {
-            return response()->json(['message' => 'Stat not found'], 404);
+
+        if (! $stat) {
+            return response()->json(['message' => 'Exam stat not found'], 404);
         }
-        return response()->json($stat);
+
+        return response()->json([
+            'data' => $this->formatResponse($stat)
+        ]);
     }
 
     public function update(Request $request, $id)
     {
         $stat = ExamStat::find($id);
-        if (!$stat) {
-            return response()->json(['message' => 'Stat not found'], 404);
+
+        if (! $stat) {
+            return response()->json(['message' => 'Exam stat not found'], 404);
         }
 
         $validated = $request->validate([
@@ -59,19 +69,31 @@ class ExamStatController extends Controller
 
         return response()->json([
             'message' => 'Exam stat updated successfully',
-            'data' => $stat
+            'data'    => $this->formatResponse($stat)
         ]);
     }
 
     public function destroy($id)
     {
         $stat = ExamStat::find($id);
-        if (!$stat) {
-            return response()->json(['message' => 'Stat not found'], 404);
+
+        if (! $stat) {
+            return response()->json(['message' => 'Exam stat not found'], 404);
         }
 
         $stat->delete();
 
         return response()->json(['message' => 'Exam stat deleted successfully']);
+    }
+
+    private function formatResponse($stat)
+    {
+        return [
+            'id'        => $stat->id,
+            'heading'   => $stat->heading,
+            'value'     => $stat->value,
+            'createdAt' => optional($stat->created_at)->toIso8601String(),
+            'updatedAt' => optional($stat->updated_at)->toIso8601String(),
+        ];
     }
 }

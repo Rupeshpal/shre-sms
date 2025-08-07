@@ -16,4 +16,9 @@ class TeacherLeaveInfo extends Model
         'casual_leaves',
         'sick_leaves',
     ];
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class, 'teacher_id');
+    }
 }

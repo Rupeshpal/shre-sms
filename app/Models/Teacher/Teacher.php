@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Teacher extends Model
 {
     use HasFactory;
+    protected $table = 'teachers';
+    protected $primaryKey = 'id';
+    public $timestamps = true;
+    protected $casts = [
+        'date_of_birth' => 'date',
+        'date_of_joining' => 'date',
+        'status' => 'boolean',
+    ];
 
     protected $fillable = [
         'teacher_code',
