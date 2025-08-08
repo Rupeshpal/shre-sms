@@ -15,6 +15,7 @@ class Assignment extends Model
     protected $fillable = [
         'title',
         'description',
+        'max_marks',
         'teacher_id',
         'subject_id',
         'section_id',

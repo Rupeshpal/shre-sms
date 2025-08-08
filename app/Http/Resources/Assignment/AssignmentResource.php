@@ -21,6 +21,7 @@ class AssignmentResource extends JsonResource
 
             'classID' => (int) $this->class_id,
             'className' => optional($this->class)->class_name,
+            'maxMarks' => (float) $this->max_marks,
 
             'sectionId' => (int) $this->section_id,
             'sectionName' => optional($this->section)->section_name,
