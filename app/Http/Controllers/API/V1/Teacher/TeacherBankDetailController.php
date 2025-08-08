@@ -164,15 +164,13 @@ class TeacherBankDetailController extends Controller
         return response()->json(['message' => 'Bank detail deleted successfully']);
     }
 
-    /**
-     * Format the bank detail to camelCase
-     */
+
     private function formatResponse($bankDetail)
     {
         return [
             'id'             => $bankDetail->id,
             'teacherId'      => $bankDetail->teacher_id,
-            'teacherName'   => optional($bankDetail->teacher)->first_name . ' ' . optional($bankDetail->teacher)->last_name, 
+            'teacherName'   => optional($bankDetail->teacher)->first_name . ' ' . optional($bankDetail->teacher)->last_name,
             'accountName'    => $bankDetail->account_name,
             'accountNumber'  => $bankDetail->account_number,
             'bankName'       => $bankDetail->bank_name,

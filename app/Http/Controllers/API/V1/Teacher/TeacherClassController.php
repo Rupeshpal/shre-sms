@@ -38,8 +38,8 @@ class TeacherClassController extends Controller
         try {
             $validated = $request->validate([
                 '*.teacherId' => 'required|exists:teachers,id',
-                '*.class'     => 'required|string|max:10',
-                '*.section'   => 'required|string|max:10',
+                '*.classId'     => 'required|integer| exists:classes,id',
+                '*.sectionId'   => 'required|integer| exists:sections,id',
             ]);
 
             $createdRecords = [];
@@ -47,8 +47,8 @@ class TeacherClassController extends Controller
             foreach ($validated as $item) {
                 $data = [
                     'teacher_id' => $item['teacherId'],
-                    'class'      => $item['class'],
-                    'section'    => $item['section'],
+                    'class'      => $item['classId'],
+                    'section'    => $item['sectionId'],
                 ];
 
                 $created = TeacherClass::create($data);
@@ -73,8 +73,8 @@ class TeacherClassController extends Controller
             $validated = $request->validate([
                 '*.id'        => 'required|exists:teacher_classes,id',
                 '*.teacherId' => 'sometimes|required|exists:teachers,id',
-                '*.class'     => 'sometimes|required|string|max:10',
-                '*.section'   => 'sometimes|required|string|max:10',
+                '*.classId'     => 'sometimes|required|integer|max:10 | exists:classes,id',
+                '*.sectionId'   => 'sometimes|required|integer|max:10| exists:sections,id',
             ]);
 
             $updatedRecords = [];
@@ -83,13 +83,13 @@ class TeacherClassController extends Controller
                 $record = TeacherClass::find($item['id']);
 
                 if (! $record) {
-                    continue; // Shouldn't happen due to validation, but safe fallback
+                    continue;
                 }
 
                 $record->update([
                     'teacher_id' => $item['teacherId'] ?? $record->teacher_id,
-                    'class'      => $item['class'] ?? $record->class,
-                    'section'    => $item['section'] ?? $record->section,
+                    'class'      => $item['classId'] ?? $record->class,
+                    'section'    => $item['sectionId'] ?? $record->section,
                 ]);
 
                 $updatedRecords[] = $this->formatResponse($record);
@@ -135,8 +135,10 @@ class TeacherClassController extends Controller
             'id'          => $item->id,
             'teacherId'   => $item->teacher_id,
             'teacherName' => optional($item->teacher)->first_name . ' ' . optional($item->teacher)->last_name,
-            'class'       => $item->class,
-            'section'     => $item->section,
+            'classId'       => $item->class,
+            'className'   => optional($item->classRelation)->class_name,
+            'sectionId'     => $item->section,
+            // 'sectionName' => optional($item->section)->section_name,
             'createdAt'   => optional($item->created_at)->toIso8601String(),
             'updatedAt'   => optional($item->updated_at)->toIso8601String(),
         ];
