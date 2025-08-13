@@ -4,6 +4,7 @@ namespace App\Models\Student;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\StudentStatusEnum;
 
 class StudentPersonalInfo extends Model
 {
@@ -15,8 +16,8 @@ class StudentPersonalInfo extends Model
 
     protected $casts = [
         'admission_date' => 'datetime',
-        'status' => 'boolean',
         'date_of_birth' => 'date',
+        'status' => StudentStatusEnum::class,
     ];
 
     protected $fillable = [

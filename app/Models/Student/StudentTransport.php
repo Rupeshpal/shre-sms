@@ -11,6 +11,11 @@ class StudentTransport extends Model
 
     protected $table = 'student_transport';
     protected $primaryKey = 'id';
+    public $timestamps = true;
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
     protected $fillable = [
         'student_id',
         'route',

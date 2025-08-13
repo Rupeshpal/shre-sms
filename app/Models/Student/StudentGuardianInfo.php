@@ -9,10 +9,14 @@ class StudentGuardianInfo extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'guardian_id';
+    protected $primaryKey = 'id';
     protected $table = 'student_guardian_info';
+    protected $keyType = 'int';
+    public $incrementing = true;
+
 
     protected $fillable = [
+        'id',
         'student_id',
         'name',
         'email',

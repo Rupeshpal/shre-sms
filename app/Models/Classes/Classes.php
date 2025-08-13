@@ -9,7 +9,10 @@ class Classes extends Model
 {
     use HasFactory;
 
-    public $incrementing = false;
+    public $incrementing = true;
+    public $timestamps = true;
+
+
     protected $primaryKey = 'id';
 
     protected $fillable = [

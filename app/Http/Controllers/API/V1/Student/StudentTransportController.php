@@ -5,29 +5,55 @@ namespace App\Http\Controllers\Api\V1\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Student\StudentTransport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class StudentTransportController extends Controller
 {
+    private function convertCamelToSnake(array $input): array
+    {
+        return collect($input)
+            ->mapWithKeys(fn($value, $key) => [Str::snake($key) => $value])
+            ->toArray();
+    }
+
+    private function formatResponse(StudentTransport $transport): array
+    {
+        return [
+            'id'            => $transport->id,
+            'studentId'     => $transport->student_id,
+            'studentName'   => $transport->student?->first_name . ' ' . $transport->student?->last_name ?? null,
+            'route'         => $transport->route,
+            'vehicleNumber' => $transport->vehicle_number,
+            'monthlyFare'   => $transport->monthly_fare,
+            'pickupPoint'   => $transport->pickup_point,
+            'createdAt'     => $transport->created_at?->toIso8601String(),
+            'updatedAt'     => $transport->updated_at?->toIso8601String(),
+        ];
+    }
+
     public function index()
     {
-        return response()->json(StudentTransport::all());
+        $transports = StudentTransport::all()->map(fn($transport) => $this->formatResponse($transport));
+        return response()->json($transports);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $data = $this->convertCamelToSnake($request->all());
+
+        $validated = validator($data, [
             'student_id'     => 'required|exists:student_personal_info,id',
             'route'          => 'nullable|string|max:100',
             'vehicle_number' => 'nullable|string|max:50',
             'monthly_fare'   => 'nullable|numeric',
             'pickup_point'   => 'nullable|string|max:100',
-        ]);
+        ])->validate();
 
         $transport = StudentTransport::create($validated);
 
         return response()->json([
             'message' => 'Transport record created successfully',
-            'data'    => $transport
+            'data'    => $this->formatResponse($transport)
         ], 201);
     }
 
@@ -37,7 +63,7 @@ class StudentTransportController extends Controller
         if (! $transport) {
             return response()->json(['message' => 'Record not found'], 404);
         }
-        return response()->json($transport);
+        return response()->json($this->formatResponse($transport));
     }
 
     public function update(Request $request, $id)
@@ -47,19 +73,21 @@ class StudentTransportController extends Controller
             return response()->json(['message' => 'Record not found'], 404);
         }
 
-        $validated = $request->validate([
+        $data = $this->convertCamelToSnake($request->all());
+
+        $validated = validator($data, [
             'student_id'     => 'sometimes|required|exists:student_personal_info,id',
             'route'          => 'nullable|string|max:100',
             'vehicle_number' => 'nullable|string|max:50',
             'monthly_fare'   => 'nullable|numeric',
             'pickup_point'   => 'nullable|string|max:100',
-        ]);
+        ])->validate();
 
         $transport->update($validated);
 
         return response()->json([
             'message' => 'Transport record updated successfully',
-            'data'    => $transport
+            'data'    => $this->formatResponse($transport)
         ]);
     }
 

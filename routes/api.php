@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\V1\Exam\TestResultController;
 use App\Http\Controllers\Api\V1\Exam\TestResultSubjectController;
 use App\Http\Controllers\Api\V1\Student\StudentDocumentController;
 use App\Http\Controllers\Api\V1\Student\StudentRelationController;
+use App\Http\Controllers\Api\V1\Classes\ClassController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,8 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('test-result-subjects', TestResultSubjectController::class);
         Route::apiResource('student-documents', StudentDocumentController::class);
         Route::apiResource('student-relations', StudentRelationController::class);
+        Route::apiResource('classes', ClassController::class);
+
 
     });
 });

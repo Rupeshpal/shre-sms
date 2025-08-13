@@ -126,9 +126,7 @@ class TeacherClassController extends Controller
         }
     }
 
-    /**
-     * Format model attributes to camelCase for API response.
-     */
+
     private function formatResponse($item)
     {
         return [

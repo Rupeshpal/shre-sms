@@ -11,7 +11,15 @@ class StudentMotherInfo extends Model
 
     protected $primaryKey = 'mother_id';
     protected $table = 'student_mother_info';
+    protected $casts = [
+        'monthly_income' => 'float',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'student_id' => 'integer',
+        'mother_id' => 'integer',
+    ];
     protected $fillable = [
+        'mother_id',
         'student_id',
         'name',
         'email',

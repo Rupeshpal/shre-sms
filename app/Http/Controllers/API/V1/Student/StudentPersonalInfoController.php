@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1\Student;
-
+use App\Enums\StudentStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Student\StudentPersonalInfo;
 use Illuminate\Http\Request;
@@ -70,7 +70,7 @@ class StudentPersonalInfoController extends Controller
             'admission_number' => 'required|string|max:50',
             'admission_date' => 'required|date',
             'roll_no' => 'required|string|max:20',
-            'status' => 'required|boolean',
+            'status' => 'required|string|in:' . implode(',', StudentStatusEnum::values()),
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
             'class_id' => 'required|integer|exists:classes,id',
@@ -145,7 +145,7 @@ class StudentPersonalInfoController extends Controller
             'admission_number' => 'nullable|string|max:50',
             'admission_date' => 'nullable|date',
             'roll_no' => 'nullable|string|max:20',
-            'status' => 'nullable|boolean',
+            'status' => 'nullable|string|in:' . implode(',', StudentStatusEnum::values()),
             'first_name' => 'sometimes|required|string|max:100',
             'last_name' => 'nullable|string|max:100',
             'class_id' => 'required|integer|exists:classes,id',

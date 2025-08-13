@@ -10,8 +10,17 @@ class StudentLeaveRequest extends Model
     use HasFactory;
     protected $table = 'students_leave_requests';
     protected $primaryKey = 'id';
+    public $timestamps = true;
+    protected $cast = [
+        'leave_date'    => 'datetime',
+        'end_date'      => 'datetime',
+        'decision_date' => 'datetime',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
+    ];
 
     protected $fillable = [
+        'id',
         'user_id',
         'leave_type',
         'leave_date',

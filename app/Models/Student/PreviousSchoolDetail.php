@@ -10,7 +10,12 @@ class PreviousSchoolDetail extends Model
     use HasFactory;
     protected $table = 'previous_school_details';
     protected $primaryKey = 'id';
+    public $timestamps = true;
+    protected $keyType = 'int';
+    
+
     protected $fillable = [
+        'id',
         'student_id',
         'school_name',
         'location',
