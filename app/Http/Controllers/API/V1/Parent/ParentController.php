@@ -36,8 +36,8 @@ class ParentController extends Controller
             'permanentAddress'       => $parent->permanent_address,
             'addedDate'              => $parent->added_date?->toIso8601String(),
             'image'                  => $parent->image ? asset('storage/' . $parent->image) : null,
-            'createdAt'              => $parent->created_at?->toIso8601String(),
-            'updatedAt'              => $parent->updated_at?->toIso8601String(),
+            'createdAt'              => $parent->created_at? \Carbon\Carbon::parse($parent->created_at)->toIso8601String() : null,
+            'updatedAt'              => $parent->updated_at? \Carbon\Carbon::parse($parent->updated_at)->toIso8601String() : null,
         ];
     }
 
