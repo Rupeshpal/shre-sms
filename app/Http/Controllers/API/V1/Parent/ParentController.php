@@ -1,24 +1,58 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Parent;
+namespace App\Http\Controllers\API\V1\Parent;
 
 use App\Http\Controllers\Controller;
 use App\Models\Parents\Parents;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class ParentController extends Controller
 {
+    // Convert request from camelCase to snake_case
+    private function convertCamelToSnake(array $input): array
+    {
+        return collect($input)
+            ->mapWithKeys(fn($value, $key) => [Str::snake($key) => $value])
+            ->toArray();
+    }
+
+    // Format response to camelCase
+    private function formatResponse(Parents $parent): array
+    {
+        return [
+            'id'                     => $parent->id,
+            'parentName'             => $parent->parent_name,
+            'gender'                 => $parent->gender,
+            'nationality'            => $parent->nationality,
+            'occupation'             => $parent->occupation,
+            'primaryMobileNumber'    => $parent->primary_mobile_number,
+            'alternateContactNumber' => $parent->alternate_contact_number,
+            'emailAddress'           => $parent->email_address,
+            'temporaryAddress'       => $parent->temporary_address,
+            'permanentAddress'       => $parent->permanent_address,
+            'addedDate'              => $parent->added_date?->toIso8601String(),
+            'image'                  => $parent->image ? asset('storage/' . $parent->image) : null,
+            'createdAt'              => $parent->created_at?->toIso8601String(),
+            'updatedAt'              => $parent->updated_at?->toIso8601String(),
+        ];
+    }
+
     public function index()
     {
-        return response()->json(Parents::all());
+        $parents = Parents::all()->map(fn($p) => $this->formatResponse($p));
+        return response()->json($parents);
     }
 
     public function store(Request $request)
     {
         try {
-            $validated = $request->validate([
+            $data = $this->convertCamelToSnake($request->all());
+
+            $validated = validator($data, [
                 'parent_name'              => 'required|string',
                 'gender'                   => 'required|in:Male,Female,Other',
                 'nationality'              => 'nullable|string',
@@ -29,15 +63,21 @@ class ParentController extends Controller
                 'temporary_address'        => 'nullable|string',
                 'permanent_address'        => 'nullable|string',
                 'added_date'               => 'nullable|date',
-                'image'                    => 'nullable|string',
-            ]);
+                'image'                    => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
+            ])->validate();
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $validated['image'] = $request->file('image')->store('parents', 'public');
+            }
 
             $parent = Parents::create($validated);
 
             return response()->json([
                 'message' => 'Parent created successfully',
-                'data'    => $parent
+                'data'    => $this->formatResponse($parent),
             ], 201);
+
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error creating parent',
@@ -50,8 +90,8 @@ class ParentController extends Controller
     {
         try {
             $parent = Parents::findOrFail($id);
-            return response()->json($parent);
-        } catch (ModelNotFoundException $e) {
+            return response()->json($this->formatResponse($parent));
+        } catch (ModelNotFoundException) {
             return response()->json(['message' => 'Parent not found'], 404);
         } catch (Exception $e) {
             return response()->json([
@@ -65,8 +105,9 @@ class ParentController extends Controller
     {
         try {
             $parent = Parents::findOrFail($id);
+            $data = $this->convertCamelToSnake($request->all());
 
-            $validated = $request->validate([
+            $validated = validator($data, [
                 'parent_name'              => 'sometimes|required|string',
                 'gender'                   => 'sometimes|required|in:Male,Female,Other',
                 'nationality'              => 'nullable|string',
@@ -77,16 +118,22 @@ class ParentController extends Controller
                 'temporary_address'        => 'nullable|string',
                 'permanent_address'        => 'nullable|string',
                 'added_date'               => 'nullable|date',
-                'image'                    => 'nullable|string',
-            ]);
+                'image'                    => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
+            ])->validate();
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $validated['image'] = $request->file('image')->store('parents', 'public');
+            }
 
             $parent->update($validated);
 
             return response()->json([
                 'message' => 'Parent updated successfully',
-                'data'    => $parent
+                'data'    => $this->formatResponse($parent),
             ]);
-        } catch (ModelNotFoundException $e) {
+
+        } catch (ModelNotFoundException) {
             return response()->json(['message' => 'Parent not found'], 404);
         } catch (Exception $e) {
             return response()->json([
@@ -101,9 +148,8 @@ class ParentController extends Controller
         try {
             $parent = Parents::findOrFail($id);
             $parent->delete();
-
             return response()->json(['message' => 'Parent deleted successfully']);
-        } catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException) {
             return response()->json(['message' => 'Parent not found'], 404);
         } catch (Exception $e) {
             return response()->json([

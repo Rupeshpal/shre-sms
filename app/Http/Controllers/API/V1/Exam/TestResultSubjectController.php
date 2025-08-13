@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Exam;
+namespace App\Http\Controllers\API\V1\Exam;
 
 use App\Http\Controllers\Controller;
 use App\Models\Exam\TestResultSubject;

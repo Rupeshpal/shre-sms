@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Assignment;
+namespace App\Http\Controllers\API\V1\Assignment;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assignment\Assignment;

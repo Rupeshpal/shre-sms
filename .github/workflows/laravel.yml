@@ -23,8 +23,8 @@ jobs:
       - name: 📤 FTP Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: shreeja.al-ibtikar.com
-          username: shreejaapi@shreeja.al-ibtikar.com
+          server: shreeja.aaditya.edu.np
+          username: shreeja@shreeja.aaditya.edu.np
           password: Rupesh#@121
           server-dir: ./
           exclude: |

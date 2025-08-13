@@ -1,16 +1,38 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Section;
+namespace App\Http\Controllers\API\V1\Section;
 
 use App\Http\Controllers\Controller;
 use App\Models\Section\Section;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SectionController extends Controller
 {
+    // Convert camelCase request to snake_case
+    private function convertCamelToSnake(array $input): array
+    {
+        return collect($input)
+            ->mapWithKeys(fn($value, $key) => [Str::snake($key) => $value])
+            ->toArray();
+    }
+
+    // Format response to camelCase
+    private function formatResponse(Section $section): array
+    {
+        return [
+            'id'          => $section->id,
+            'sectionName' => $section->section_name,
+            'status'      => $section->status,
+            'createdAt'   => $section->created_at?->toIso8601String(),
+            'updatedAt'   => $section->updated_at?->toIso8601String(),
+        ];
+    }
+
     public function index()
     {
-        return response()->json(Section::all());
+        $sections = Section::all()->map(fn($s) => $this->formatResponse($s));
+        return response()->json($sections);
     }
 
     public function show($id)
@@ -19,19 +41,21 @@ class SectionController extends Controller
         if (! $section) {
             return response()->json(['message' => 'Section not found'], 404);
         }
-        return response()->json($section);
+        return response()->json($this->formatResponse($section));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'section_name'  => 'required|string|max:255',
-            'status'        => 'nullable|boolean',
-        ]);
+        $data = $this->convertCamelToSnake($request->all());
+
+        $validated = validator($data, [
+            'section_name' => 'required|string|max:255',
+            'status'       => 'nullable|boolean',
+        ])->validate();
 
         $section = Section::create($validated);
 
-        return response()->json($section, 201);
+        return response()->json($this->formatResponse($section), 201);
     }
 
     public function update(Request $request, $id)
@@ -41,14 +65,16 @@ class SectionController extends Controller
             return response()->json(['message' => 'Section not found'], 404);
         }
 
-        $validated = $request->validate([
-            'section_name'  => 'sometimes|required|string|max:255',
-            'status'        => 'nullable|boolean',
-        ]);
+        $data = $this->convertCamelToSnake($request->all());
+
+        $validated = validator($data, [
+            'section_name' => 'sometimes|required|string|max:255',
+            'status'       => 'nullable|boolean',
+        ])->validate();
 
         $section->update($validated);
 
-        return response()->json(data: $section);
+        return response()->json($this->formatResponse($section));
     }
 
     public function destroy($id)
@@ -59,7 +85,6 @@ class SectionController extends Controller
         }
 
         $section->delete();
-
         return response()->json(['message' => 'Section deleted successfully']);
     }
 }
