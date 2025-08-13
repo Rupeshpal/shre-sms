@@ -12,13 +12,13 @@ class Parents extends Model
     protected $table = 'parents';
     public $timestamps = true;
     protected $primaryKey = 'id';
-    protected $incrementing = true;
-     protected $casts=[
+    public $incrementing = true; // <-- change to public
+     
+    protected $casts = [
         'added_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-     ];
-
+    ];
 
     protected $fillable = [
         'id',
