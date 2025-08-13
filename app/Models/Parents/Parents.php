@@ -10,11 +10,13 @@ class Parents extends Model
     use HasFactory;
 
     protected $table = 'parents';
+    public $timestamps = true;
+    protected $primaryKey = 'id';
+    protected $incrementing = true;
 
-    public $incrementing = false;
-    protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'parent_name',
         'gender',
         'nationality',
