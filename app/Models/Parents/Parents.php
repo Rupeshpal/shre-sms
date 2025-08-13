@@ -13,6 +13,11 @@ class Parents extends Model
     public $timestamps = true;
     protected $primaryKey = 'id';
     protected $incrementing = true;
+     protected $casts=[
+        'added_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+     ];
 
 
     protected $fillable = [
