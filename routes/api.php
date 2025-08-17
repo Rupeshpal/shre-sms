@@ -36,6 +36,8 @@ use App\Http\Controllers\API\V1\Student\StudentRelationController;
 use App\Http\Controllers\API\V1\Classes\ClassController;
 use App\Http\Controllers\API\V1\Teacher\AddressController;
 use App\Http\Controllers\API\V1\Teacher\TeacherDocController;
+use App\Http\Controllers\API\V1\Teacher\TeacherTransportController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -74,6 +76,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('teacher-leave-requests', TeacherLeaveRequestController::class);
         Route::apiResource('teacher-addresses', AddressController::class);
         Route::apiResource('teacher-documents',TeacherDocController::class);
+        Route::apiResource('teacher-transports', TeacherTransportController::class);
         Route::apiResource('parents', ParentController::class);
         Route::apiResource('academic-years', AcademicYearController::class);
         Route::apiResource('student-personal-info', StudentPersonalInfoController::class);
