@@ -5,126 +5,146 @@ namespace App\Http\Controllers\API\V1\Classes;
 use App\Http\Controllers\Controller;
 use App\Models\Classes\Classes;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Exception;
 
 class ClassController extends Controller
 {
     public function index()
     {
-        $classes = Classes::all();
+        try {
+            $classes = Classes::all();
 
-        $response = $classes->map(function ($class) {
-            return $this->formatClass($class);
-        });
+            $response = $classes->map(function ($class) {
+                return $this->formatClass($class);
+            });
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Class list fetched successfully',
-            'data' => $response,
-        ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Class list fetched successfully',
+                'data' => $response,
+            ]);
+        } catch (Exception $e) {
+            return $this->handleError($e, 'Failed to fetch class list');
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'className' => 'required|string',
-            'capacity' => 'required|integer',
-            'noOfStudents' => 'required|integer',
-            'noOfSubjects' => 'required|integer',
-            'crName' => 'nullable|string',
-            'classTeacher' => 'nullable|string',
-            'classStatus' => 'required|boolean',
-        ]);
+        try {
+            $request->validate([
+                'className' => 'required|string',
+                'capacity' => 'required|integer',
+                'noOfStudents' => 'required|integer',
+                'noOfSubjects' => 'required|integer',
+                'roomNo' => 'nullable|integer',
+                'crName' => 'nullable|string',
+                'classTeacher' => 'nullable|string',
+                'classStatus' => 'required|boolean',
+            ]);
 
-        $class = Classes::create([
-            'class_name' => $request->className,
-            'capacity' => $request->capacity,
-            'no_of_students' => $request->noOfStudents,
-            'no_of_subjects' => $request->noOfSubjects,
-            'cr_name' => $request->crName,
-            'class_teacher' => $request->classTeacher,
-            'class_status' => $request->classStatus,
-        ]);
+            $class = Classes::create([
+                'class_name' => $request->className,
+                'capacity' => $request->capacity,
+                'no_of_students' => $request->noOfStudents,
+                'no_of_subjects' => $request->noOfSubjects,
+                'room_no' => $request->roomNo,
+                'cr_name' => $request->crName,
+                'class_teacher' => $request->classTeacher,
+                'class_status' => $request->classStatus,
+            ]);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Class created successfully',
-            'data' => $this->formatClass($class),
-        ], 201);
+            return response()->json([
+                'status' => true,
+                'message' => 'Class created successfully',
+                'data' => $this->formatClass($class),
+            ], 201);
+        } catch (Exception $e) {
+            return $this->handleError($e, 'Failed to create class');
+        }
     }
 
     public function show($id)
     {
-        $class = Classes::find($id);
+        try {
+            $class = Classes::findOrFail($id);
 
-        if (!$class) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Class details fetched successfully',
+                'data' => $this->formatClass($class),
+            ]);
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Class not found',
             ], 404);
+        } catch (Exception $e) {
+            return $this->handleError($e, 'Failed to fetch class details');
         }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Class details fetched successfully',
-            'data' => $this->formatClass($class),
-        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $class = Classes::find($id);
+        try {
+            $class = Classes::findOrFail($id);
 
-        if (!$class) {
+            $request->validate([
+                'className' => 'required|string',
+                'capacity' => 'required|integer',
+                'noOfStudents' => 'required|integer',
+                'noOfSubjects' => 'required|integer',
+                'roomNo' => 'nullable|integer',
+                'crName' => 'nullable|string',
+                'classTeacher' => 'nullable|string',
+                'classStatus' => 'required|boolean',
+            ]);
+
+            $class->update([
+                'class_name' => $request->className,
+                'capacity' => $request->capacity,
+                'no_of_students' => $request->noOfStudents,
+                'no_of_subjects' => $request->noOfSubjects,
+                'room_no' => $request->roomNo,
+                'cr_name' => $request->crName,
+                'class_teacher' => $request->classTeacher,
+                'class_status' => $request->classStatus,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Class updated successfully',
+                'data' => $this->formatClass($class),
+            ]);
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Class not found',
             ], 404);
+        } catch (Exception $e) {
+            return $this->handleError($e, 'Failed to update class');
         }
-
-        $request->validate([
-            'className' => 'required|string',
-            'capacity' => 'required|integer',
-            'noOfStudents' => 'required|integer',
-            'noOfSubjects' => 'required|integer',
-            'crName' => 'nullable|string',
-            'classTeacher' => 'nullable|string',
-            'classStatus' => 'required|boolean',
-        ]);
-
-        $class->update([
-            'class_name' => $request->className,
-            'capacity' => $request->capacity,
-            'no_of_students' => $request->noOfStudents,
-            'no_of_subjects' => $request->noOfSubjects,
-            'cr_name' => $request->crName,
-            'class_teacher' => $request->classTeacher,
-            'class_status' => $request->classStatus,
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Class updated successfully',
-            'data' => $this->formatClass($class),
-        ]);
     }
 
     public function destroy($id)
     {
-        $class = Classes::find($id);
+        try {
+            $class = Classes::findOrFail($id);
 
-        if (!$class) {
+            $class->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Class deleted successfully',
+            ]);
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Class not found',
             ], 404);
+        } catch (Exception $e) {
+            return $this->handleError($e, 'Failed to delete class');
         }
-
-        $class->delete();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Class deleted successfully',
-        ]);
     }
 
     /**
@@ -138,9 +158,22 @@ class ClassController extends Controller
             'capacity' => $class->capacity,
             'noOfStudents' => $class->no_of_students,
             'noOfSubjects' => $class->no_of_subjects,
+            'roomNo' => $class->room_no,
             'crName' => $class->cr_name,
             'classTeacher' => $class->class_teacher,
-            'classStatus' => $class->class_status,
+            'classStatus' => (bool) $class->class_status,
         ];
+    }
+
+    /**
+     * Handle errors and return a JSON response.
+     */
+    private function handleError(Exception $e, string $customMessage, int $status = 500)
+    {
+        return response()->json([
+            'status' => false,
+            'message' => $customMessage,
+            'error' => $e->getMessage(),
+        ], $status);
     }
 }

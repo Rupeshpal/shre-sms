@@ -34,6 +34,7 @@ use App\Http\Controllers\API\V1\Exam\TestResultSubjectController;
 use App\Http\Controllers\API\V1\Student\StudentDocumentController;
 use App\Http\Controllers\API\V1\Student\StudentRelationController;
 use App\Http\Controllers\API\V1\Classes\ClassController;
+use App\Http\Controllers\API\V1\Teacher\AddressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,6 +72,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('teacher-leave-infos', TeacherLeaveInfoController::class);
         Route::apiResource('teacher-attendances', TeacherAttendanceController::class);
         Route::apiResource('teacher-leave-requests', TeacherLeaveRequestController::class);
+        Route::apiResource('teacher-addresses', AddressController::class);
         Route::apiResource('parents', ParentController::class);
         Route::apiResource('academic-years', AcademicYearController::class);
         Route::apiResource('student-personal-info', StudentPersonalInfoController::class);

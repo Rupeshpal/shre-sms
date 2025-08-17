@@ -19,6 +19,7 @@ class Classes extends Model
         'id',
         'class_name',
         'capacity',
+        'room_no',
         'no_of_students',
         'no_of_subjects',
         'cr_name',
