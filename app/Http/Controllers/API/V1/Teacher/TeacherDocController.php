@@ -7,14 +7,15 @@ use App\Models\Teacher\TeacherDoc;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Storage;
 
 class TeacherDocController extends Controller
 {
     private function convertCamelToSnake(array $input): array
     {
         return collect($input)
-            ->mapWithKeys(fn($value, $key) => [strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $key)) => $value])
+            ->mapWithKeys(fn($value, $key) =>
+                [strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', $key)) => $value]
+            )
             ->toArray();
     }
 
@@ -24,11 +25,11 @@ class TeacherDocController extends Controller
             'id'                    => $teacherDetail->id,
             'teacherId'             => $teacherDetail->teacher_id,
             'teacherName'           => optional($teacherDetail->teacher)->first_name . ' ' . optional($teacherDetail->teacher)->last_name,
-            'joiningLetter'         => $teacherDetail->joining_letter ? Storage::url($teacherDetail->joining_letter) : null,
-            'experienceCertificate' => $teacherDetail->experience_certificate ? Storage::url($teacherDetail->experience_certificate) : null,
-            'characterCertificate'  => $teacherDetail->character_certificate ? Storage::url($teacherDetail->character_certificate) : null,
-            'mainSheets'            => $teacherDetail->main_sheets ? Storage::url($teacherDetail->main_sheets) : null,
-            'medicalConditionFile'  => $teacherDetail->medical_condition_file ? Storage::url($teacherDetail->medical_condition_file) : null,
+            'joiningLetter'         => $teacherDetail->joining_letter ? asset('storage/' . $teacherDetail->joining_letter) : null,
+            'experienceCertificate' => $teacherDetail->experience_certificate ? asset('storage/' . $teacherDetail->experience_certificate) : null,
+            'characterCertificate'  => $teacherDetail->character_certificate ? asset('storage/' . $teacherDetail->character_certificate) : null,
+            'mainSheets'            => $teacherDetail->main_sheets ? asset('storage/' . $teacherDetail->main_sheets) : null,
+            'medicalConditionFile'  => $teacherDetail->medical_condition_file ? asset('storage/' . $teacherDetail->medical_condition_file) : null,
             'medicalStatus'         => $teacherDetail->medical_status,
             'allergies'             => $teacherDetail->allergies,
             'medication'            => $teacherDetail->medication,
@@ -46,33 +47,43 @@ class TeacherDocController extends Controller
     public function store(Request $request)
     {
         try {
-            $data = $this->convertCamelToSnake($request->all());
+            // exclude file fields before validation
+            $data = $this->convertCamelToSnake(
+                $request->except([
+                    'joiningLetter',
+                    'experienceCertificate',
+                    'characterCertificate',
+                    'mainSheets',
+                    'medicalConditionFile'
+                ])
+            );
 
             $validated = validator($data, [
-                'teacher_id' => 'required|integer',
-                'joining_letter' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'experience_certificate' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'character_certificate' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'main_sheets' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'medical_condition_file' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'medical_status' => 'required|string|in:Good,Bad,Others',
-                'allergies' => 'nullable|string',
-                'medication' => 'nullable|string',
+                'teacher_id'             => 'required|integer',
+                'medical_status'         => 'required|string|in:Good,Bad,Others',
+                'allergies'              => 'nullable|string',
+                'medication'             => 'nullable|string',
             ])->validate();
 
-            foreach (['joining_letter','experience_certificate','character_certificate','main_sheets','medical_condition_file'] as $field) {
-                if ($request->hasFile($field)) {
-                    // ✅ ensure visibility is public
-                    $validated[$field] = $request->file($field)->store('teacher_documents', ['disk' => 'public', 'visibility' => 'public']);
+            // Handle file uploads
+            foreach ([
+                'joining_letter' => 'joiningLetter',
+                'experience_certificate' => 'experienceCertificate',
+                'character_certificate' => 'characterCertificate',
+                'main_sheets' => 'mainSheets',
+                'medical_condition_file' => 'medicalConditionFile',
+            ] as $snake => $camel) {
+                if ($request->hasFile($camel)) {
+                    $validated[$snake] = $request->file($camel)->store('teacher_documents', 'public');
                 }
             }
 
             $teacherDetail = TeacherDoc::create($validated);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Teacher details created successfully',
-                'data' => $this->formatResponse($teacherDetail)
+                'data'    => $this->formatResponse($teacherDetail)
             ], 201);
 
         } catch (ValidationException $e) {
@@ -100,32 +111,43 @@ class TeacherDocController extends Controller
         }
 
         try {
-            $data = $this->convertCamelToSnake($request->all());
+            // exclude file fields before validation
+            $data = $this->convertCamelToSnake(
+                $request->except([
+                    'joiningLetter',
+                    'experienceCertificate',
+                    'characterCertificate',
+                    'mainSheets',
+                    'medicalConditionFile'
+                ])
+            );
 
             $validated = validator($data, [
-                'teacher_id' => 'required|integer',
-                'joining_letter' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'experience_certificate' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'character_certificate' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'main_sheets' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'medical_condition_file' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-                'medical_status' => 'required|string|in:Good,Bad,Others',
-                'allergies' => 'nullable|string',
-                'medication' => 'nullable|string',
+                'teacher_id'             => 'required|integer',
+                'medical_status'         => 'required|string|in:Good,Bad,Others',
+                'allergies'              => 'nullable|string',
+                'medication'             => 'nullable|string',
             ])->validate();
 
-            foreach (['joining_letter','experience_certificate','character_certificate','main_sheets','medical_condition_file'] as $field) {
-                if ($request->hasFile($field)) {
-                    $validated[$field] = $request->file($field)->store('teacher_documents', ['disk' => 'public', 'visibility' => 'public']);
+            // Handle file uploads
+            foreach ([
+                'joining_letter' => 'joiningLetter',
+                'experience_certificate' => 'experienceCertificate',
+                'character_certificate' => 'characterCertificate',
+                'main_sheets' => 'mainSheets',
+                'medical_condition_file' => 'medicalConditionFile',
+            ] as $snake => $camel) {
+                if ($request->hasFile($camel)) {
+                    $validated[$snake] = $request->file($camel)->store('teacher_documents', 'public');
                 }
             }
 
             $teacherDetail->update($validated);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Teacher details updated successfully',
-                'data' => $this->formatResponse($teacherDetail)
+                'data'    => $this->formatResponse($teacherDetail)
             ]);
 
         } catch (ValidationException $e) {
