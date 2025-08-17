@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\API\V1\Teacher;
+
 use App\Http\Controllers\Controller;
 use App\Models\Teacher\TeacherDoc;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
 
 class TeacherDocController extends Controller
 {
@@ -21,11 +24,11 @@ class TeacherDocController extends Controller
             'id'                    => $teacherDetail->id,
             'teacherId'             => $teacherDetail->teacher_id,
             'teacherName'           => optional($teacherDetail->teacher)->first_name . ' ' . optional($teacherDetail->teacher)->last_name,
-            'joiningLetter'         => $teacherDetail->joining_letter ? asset('storage/' . $teacherDetail->joining_letter) : null,
-            'experienceCertificate' => $teacherDetail->experience_certificate ? asset('storage/' . $teacherDetail->experience_certificate) : null,
-            'characterCertificate'  => $teacherDetail->character_certificate ? asset('storage/' . $teacherDetail->character_certificate) : null,
-            'mainSheets'            => $teacherDetail->main_sheets ? asset('storage/' . $teacherDetail->main_sheets) : null,
-            'medicalConditionFile'  => $teacherDetail->medical_condition_file ? asset('storage/' . $teacherDetail->medical_condition_file) : null,
+            'joiningLetter'         => $teacherDetail->joining_letter ? Storage::url($teacherDetail->joining_letter) : null,
+            'experienceCertificate' => $teacherDetail->experience_certificate ? Storage::url($teacherDetail->experience_certificate) : null,
+            'characterCertificate'  => $teacherDetail->character_certificate ? Storage::url($teacherDetail->character_certificate) : null,
+            'mainSheets'            => $teacherDetail->main_sheets ? Storage::url($teacherDetail->main_sheets) : null,
+            'medicalConditionFile'  => $teacherDetail->medical_condition_file ? Storage::url($teacherDetail->medical_condition_file) : null,
             'medicalStatus'         => $teacherDetail->medical_status,
             'allergies'             => $teacherDetail->allergies,
             'medication'            => $teacherDetail->medication,
@@ -33,7 +36,6 @@ class TeacherDocController extends Controller
             'updatedAt'             => $teacherDetail->updated_at?->toIso8601String(),
         ];
     }
-    
 
     public function index()
     {
@@ -60,7 +62,8 @@ class TeacherDocController extends Controller
 
             foreach (['joining_letter','experience_certificate','character_certificate','main_sheets','medical_condition_file'] as $field) {
                 if ($request->hasFile($field)) {
-                    $validated[$field] = $request->file($field)->store('teacher_documents', 'public');
+                    // ✅ ensure visibility is public
+                    $validated[$field] = $request->file($field)->store('teacher_documents', ['disk' => 'public', 'visibility' => 'public']);
                 }
             }
 
@@ -111,10 +114,9 @@ class TeacherDocController extends Controller
                 'medication' => 'nullable|string',
             ])->validate();
 
-            // Handle file uploads
             foreach (['joining_letter','experience_certificate','character_certificate','main_sheets','medical_condition_file'] as $field) {
                 if ($request->hasFile($field)) {
-                    $validated[$field] = $request->file($field)->store('teacher_documents', 'public');
+                    $validated[$field] = $request->file($field)->store('teacher_documents', ['disk' => 'public', 'visibility' => 'public']);
                 }
             }
 
