@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\API\V1\Teacher;
-
 use App\Http\Controllers\Controller;
 use App\Models\Teacher\TeacherClass;
 use Illuminate\Http\Request;

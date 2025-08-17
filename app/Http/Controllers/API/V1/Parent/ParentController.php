@@ -31,6 +31,8 @@ class ParentController extends Controller
             'occupation'             => $parent->occupation,
             'primaryMobileNumber'    => $parent->primary_mobile_number,
             'alternateContactNumber' => $parent->alternate_contact_number,
+            'studentId'              => $parent->student_id,
+            'studentName'            => $parent->student->first_name . ' ' . $parent->student->last_name,
             'emailAddress'           => $parent->email_address,
             'temporaryAddress'       => $parent->temporary_address,
             'permanentAddress'       => $parent->permanent_address,
@@ -62,6 +64,7 @@ class ParentController extends Controller
                 'email_address'            => 'nullable|email',
                 'temporary_address'        => 'nullable|string',
                 'permanent_address'        => 'nullable|string',
+                'student_id'               => 'nullable|integer',
                 'added_date'               => 'nullable|date',
                 'image'                    => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
             ])->validate();
@@ -118,6 +121,7 @@ class ParentController extends Controller
                 'temporary_address'        => 'nullable|string',
                 'permanent_address'        => 'nullable|string',
                 'added_date'               => 'nullable|date',
+                'student_id'               => 'nullable|integer',
                 'image'                    => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
             ])->validate();
 
