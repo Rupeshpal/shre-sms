@@ -1,7 +1,11 @@
 <?php
 
 namespace App\Models\Teacher;
-
+use App\Models\Teacher\Teacher;
+use App\Models\Teacher\Route;
+use App\Models\Teacher\Vehicle;
+use App\Models\Teacher\MonthlyFair;
+use App\Models\Teacher\PickupPoint;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +21,7 @@ class TeacherTransport extends Model
         'pickup_point_id',
     ];
 
+    // Import related models
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'teacher_id');
@@ -42,3 +47,6 @@ class TeacherTransport extends Model
         return $this->belongsTo(PickupPoint::class, 'pickup_point_id');
     }
 }
+
+
+
