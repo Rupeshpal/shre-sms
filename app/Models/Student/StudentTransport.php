@@ -8,9 +8,12 @@ use App\Models\Teacher\MonthlyFair;
 use App\Models\Teacher\PickupPoint;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 class StudentTransport extends Model
 {
     use HasFactory;
+
+    protected $table = 'student_transport';
 
     protected $fillable = [
         'student_id',
@@ -45,6 +48,3 @@ class StudentTransport extends Model
         return $this->belongsTo(PickupPoint::class, 'pickup_point_id');
     }
 }
-
-
-

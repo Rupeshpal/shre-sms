@@ -14,13 +14,24 @@ class StudentTransportController extends Controller
     {
         try {
             $transports = StudentTransport::with(['student', 'route', 'vehicle', 'monthlyFair', 'pickupPoint'])->get();
-
             $data = $transports->map(fn($transport) => $this->transformResponse($transport));
 
-            return response()->json(['status' => true, 'data' => $data]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Transport records fetched successfully',
+                'data' => $data
+            ]);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Failed to fetch records'], 500);
+            Log::error('Error fetching transports:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch records',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -32,77 +43,115 @@ class StudentTransportController extends Controller
             $transport = StudentTransport::create($this->transformRequest($validated));
 
             return response()->json([
-                'status'  => true,
-                'message' => 'Teacher transport record created successfully',
-                'data'    => $this->transformResponse($transport)
+                'status' => true,
+                'message' => 'Transport record created successfully',
+                'data' => $this->transformResponse($transport)
             ], 201);
         } catch (ValidationException $e) {
-            return response()->json(['status' => false, 'errors' => $e->errors()], 422);
+            return response()->json([
+                'status' => false,
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Something went wrong while creating record'], 500);
+            Log::error('Error creating StudentTransport:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong while creating record',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
     public function show($id)
     {
-        $transport = StudentTransport::with(['student', 'route', 'vehicle', 'monthlyFair', 'pickupPoint'])->find($id);
+        try {
+            $transport = StudentTransport::with(['student', 'route', 'vehicle', 'monthlyFair', 'pickupPoint'])->findOrFail($id);
 
-        if (!$transport) {
-            return response()->json(['status' => false, 'message' => 'Transport record not found'], 404);
+            return response()->json([
+                'status' => true,
+                'message' => 'Transport record fetched successfully',
+                'data' => $this->transformResponse($transport)
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching transport:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Transport record not found',
+                'error' => $e->getMessage()
+            ], 404);
         }
-
-        return response()->json(['status' => true, 'data' => $this->transformResponse($transport)]);
     }
 
     public function update(Request $request, $id)
     {
-        $transport = StudentTransport::find($id);
-
-        if (!$transport) {
-            return response()->json(['status' => false, 'message' => 'Transport record not found'], 404);
-        }
-
         try {
+            $transport = StudentTransport::findOrFail($id);
+
             $validated = $this->validateRequest($request);
 
             $transport->update($this->transformRequest($validated));
 
             return response()->json([
-                'status'  => true,
-                'message' => 'Teacher transport record updated successfully',
-                'data'    => $this->transformResponse($transport)
+                'status' => true,
+                'message' => 'Transport record updated successfully',
+                'data' => $this->transformResponse($transport)
             ]);
         } catch (ValidationException $e) {
-            return response()->json(['status' => false, 'errors' => $e->errors()], 422);
+            return response()->json([
+                'status' => false,
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Something went wrong while updating record'], 500);
+            Log::error('Error updating StudentTransport:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong while updating record',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
     public function destroy($id)
     {
-        $transport = StudentTransport::find($id);
-
-        if (!$transport) {
-            return response()->json(['status' => false, 'message' => 'Transport record not found'], 404);
-        }
-
         try {
+            $transport = StudentTransport::findOrFail($id);
+
             $transport->delete();
 
-            return response()->json(['status' => true, 'message' => 'Teacher transport record deleted successfully']);
+            return response()->json([
+                'status' => true,
+                'message' => 'Transport record deleted successfully'
+            ]);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return response()->json(['status' => false, 'message' => 'Failed to delete record'], 500);
+            Log::error('Error deleting StudentTransport:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to delete record',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
     private function validateRequest(Request $request): array
     {
         return $request->validate([
-            'studentId'      => 'required|exists:teachers,id',
+            'studentId'      => 'required|exists:student_personal_info,id',
             'routeId'        => 'required|exists:routes,id',
             'vehicleId'      => 'required|exists:vehicles,id',
             'monthlyFairId'  => 'required|exists:monthly_fairs,id',
@@ -124,16 +173,16 @@ class StudentTransportController extends Controller
     private function transformResponse(StudentTransport $transport): array
     {
         return [
-            'id'            => $transport->id,
-            'studentId'     => $transport->student_id,
+            'id'            => (int) $transport->id,
+            'studentId'     => (int) $transport->student_id,
             'teacherName'   => optional($transport->student)->first_name . ' ' . optional($transport->student)->last_name,
-            'routeId'       => $transport->route_id,
+            'routeId'       => (int) $transport->route_id,
             'routeName'     => optional($transport->route)->route_name,
-            'vehicleId'     => $transport->vehicle_id,
+            'vehicleId'     => (int) $transport->vehicle_id,
             'vehicleNumber' => optional($transport->vehicle)->vehicle_number,
-            'monthlyFairId' => $transport->monthly_fair_id,
+            'monthlyFairId' => (int) $transport->monthly_fair_id,
             'monthlyFair'   => optional($transport->monthlyFair)->fair_amount,
-            'pickupPointId' => $transport->pickup_point_id,
+            'pickupPointId' => (int) $transport->pickup_point_id,
             'pickupPoint'   => optional($transport->pickupPoint)->point_name,
             'createdAt'     => $transport->created_at?->toIso8601String(),
             'updatedAt'     => $transport->updated_at?->toIso8601String(),
