@@ -7,7 +7,7 @@ class AcademicYear extends Model
 {
     use HasFactory;
     protected $table = 'academic_years';
-    protected $cast = [
+    protected $casts = [
         'start_date' => 'datetime',
         'status' => 'boolean',
         'current_academic_year' => 'boolean',
