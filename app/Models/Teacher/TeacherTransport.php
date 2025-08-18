@@ -21,7 +21,6 @@ class TeacherTransport extends Model
         'pickup_point_id',
     ];
 
-    // Import related models
     public function teacher()
     {
         return $this->belongsTo(Teacher::class, 'teacher_id');

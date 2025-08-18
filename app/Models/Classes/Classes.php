@@ -16,6 +16,10 @@ class Classes extends Model
     protected $primaryKey = 'id';
     protected $casts = [
         'room_no' => 'integer',
+        'capacity' => 'integer',
+        'no_of_students'=>'integer',
+        'no_of_subjects' =>'integer'
+
     ];
 
     protected $fillable = [
