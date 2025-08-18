@@ -11,6 +11,8 @@ class AcademicYear extends Model
         'start_date' => 'datetime',
         'status' => 'boolean',
         'current_academic_year' => 'boolean',
+        'semester_count'=>'integer',
+        'exam_count'  =>'integer',
         'end_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
