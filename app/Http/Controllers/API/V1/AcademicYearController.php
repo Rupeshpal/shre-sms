@@ -23,18 +23,19 @@ class AcademicYearController extends Controller
     private function formatResponse(AcademicYear $year)
     {
         return [
-            'id' => $year->id,
+            'id' => (int) $year->id,
             'academicYear' => $year->academic_year,
-            'startDate' => $year->start_date,
-            'endDate' => $year->end_date,
-            'semesterCount' => $year->semester_count,
-            'examCount' => $year->exam_count,
-            'status' => $year->status==1? true : false,
-            'currentAcademicYear' => $year->current_academic_year==1 ? true : false,
+            'startDate' => $year->start_date?->toDateString(), 
+            'endDate' => $year->end_date?->toDateString(),
+            'semesterCount' => (int) $year->semester_count,
+            'examCount' => (int) $year->exam_count,
+            'status' => (bool) $year->status,
+            'currentAcademicYear' => (bool) $year->current_academic_year,
             'createdAt' => $year->created_at?->toIso8601String(),
             'updatedAt' => $year->updated_at?->toIso8601String(),
         ];
     }
+    
 
     public function index()
     {
