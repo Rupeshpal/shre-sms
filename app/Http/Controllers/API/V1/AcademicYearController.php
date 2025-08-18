@@ -25,8 +25,8 @@ class AcademicYearController extends Controller
         return [
             'id' => (int) $year->id,
             'academicYear' => $year->academic_year,
-            'startDate' => $year->start_date?->toDateString(), 
-            'endDate' => $year->end_date?->toDateString(),
+            'startDate' => $year->start_date?->toIso8601String(), 
+            'endDate' => $year->end_date?->toIso8601String(),
             'semesterCount' => (int) $year->semester_count,
             'examCount' => (int) $year->exam_count,
             'status' => (bool) $year->status,
