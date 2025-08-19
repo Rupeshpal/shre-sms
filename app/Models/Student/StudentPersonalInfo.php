@@ -17,8 +17,11 @@ class StudentPersonalInfo extends Model
     protected $casts = [
         'admission_date' => 'datetime',
         'date_of_birth' => 'date',
+        'academic_year_id'=> 'integer',
         'status' => StudentStatusEnum::class,
     ];
+
+
 
     protected $fillable = [
         'academic_year_id',

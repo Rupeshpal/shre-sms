@@ -17,11 +17,12 @@ class StudentLeaveRequest extends Model
         'decision_date' => 'datetime',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
+        'student_id'      =>'integer',
     ];
 
     protected $fillable = [
         'id',
-        'user_id',
+        'student_id',
         'leave_type',
         'leave_date',
         'end_date',
@@ -35,11 +36,23 @@ class StudentLeaveRequest extends Model
 
     public function student()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(\App\Models\Student\StudentPersonalInfo::class, 'student_id');
     }
 
     public function approver()
     {
         return $this->belongsTo(\App\Models\User::class, 'approver_id');
+    }
+    public function class()
+    {
+        return $this->belongsTo('App\Models\Classes\Classes', 'class_id');
+    }
+    public function academic()
+    {
+        return $this->belongsTo('App\Models\AcademicYear', 'academic_year_id');
+    }
+    public function section()
+    {
+        return $this->belongsTo('App\Models\Section\Section', 'section_id');
     }
 }

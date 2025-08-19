@@ -17,6 +17,7 @@ class AcademicYear extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+    
 
     protected $fillable = [
         'academic_year',

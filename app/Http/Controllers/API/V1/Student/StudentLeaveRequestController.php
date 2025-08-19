@@ -21,8 +21,19 @@ class StudentLeaveRequestController extends Controller
 
         return [
             'id' => $leave->id,
-            'userId' => $leave->user_id,
+            'studentId' => $leave->user_id,
+            'studentName' => $leave->student->first_name . ' '. $leave->student->last_name ?? null,
+            'studentRollNo' => $leave->student->roll_no,
+            'studentAdmissionNo' => $leave->student->admission_number,
             'leaveType' => $leave->leave_type,
+            'class' => [
+                'classId' => $leave->class_id,
+                'className' => $leave->class->class_name ?? null
+            ],
+            'section' => [
+                'sectionId' => $leave->section_id,
+                'sectionName' => $leave->section->section_name ?? null
+            ],
             'leaveDate' => $leave->leave_date ? \Carbon\Carbon::parse($leave->leave_date)->toIso8601String() : null,
             'endDate' => $leave->end_date ? \Carbon\Carbon::parse($leave->end_date)->toIso8601String() : null,
             'noOfDays' => $leave->no_of_days,
@@ -48,7 +59,7 @@ class StudentLeaveRequestController extends Controller
         $data = $this->convertCamelToSnake($request->all());
 
         $validated = validator($data, [
-            'user_id' => 'required|exists:users,id',
+            'student_id' => 'required|exists:student_personal_info,id',
             'leave_type' => 'required|in:sick,casual,earned,maternity,other',
             'leave_date' => 'required|date',
             'end_date' => 'nullable|date',
@@ -86,7 +97,7 @@ class StudentLeaveRequestController extends Controller
         $data = $this->convertCamelToSnake($request->all());
 
         $validated = validator($data, [
-            'user_id' => 'sometimes|required|exists:users,id',
+            'student_id' => 'sometimes|required|exists:student_personal_info,id',
             'leave_type' => 'sometimes|required|in:sick,casual,earned,maternity,other',
             'leave_date' => 'sometimes|required|date',
             'end_date' => 'nullable|date',
