@@ -19,7 +19,11 @@ class Exam extends Model
     protected $table = 'exams';
 
     protected $casts=[
-        
+        'class'=>'integer',
+        'section'=>'integer',
+        'subject'=>'integer',
+        'pass_mark' =>'integer',
+        'full_mark' =>'integer',
 
     ];
 
