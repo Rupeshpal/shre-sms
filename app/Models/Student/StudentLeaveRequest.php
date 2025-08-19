@@ -36,7 +36,6 @@ class StudentLeaveRequest extends Model
         'decision_date',
         'class_id',
         'section_id',
-        'academic_year_id',
     ];
 
     public function student()

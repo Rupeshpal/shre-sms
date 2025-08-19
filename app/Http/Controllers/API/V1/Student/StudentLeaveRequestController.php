@@ -26,7 +26,6 @@ class StudentLeaveRequestController extends Controller
             'studentRollNo' => optional($leave->student)->roll_no,
             'studentAdmissionNo' => optional($leave->student)->admission_number,
             'leaveType' => $leave->leave_type,
-            'academicYearId' => $leave->academic_year_id,
             'class' => [
                 'classId' => $leave->class_id,
                 'className' => optional($leave->class)->class_name
@@ -84,7 +83,6 @@ class StudentLeaveRequestController extends Controller
             'decision_date' => 'nullable|date',
             'class_id' => 'required|exists:classes,id',
             'section_id' => 'required|exists:sections,id',
-            'academic_year_id' => 'required|exists:academic_years,id',
         ]);
 
         if ($validator->fails()) {
@@ -151,7 +149,6 @@ class StudentLeaveRequestController extends Controller
                 'decision_date' => 'nullable|date',
                 'class_id' => 'sometimes|required|exists:classes,id',
                 'section_id' => 'sometimes|required|exists:sections,id',
-                'academic_year_id' => 'sometimes|required|exists:academic_years,id',
             ]);
 
             if ($validator->fails()) {
