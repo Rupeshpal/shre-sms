@@ -8,20 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 class StudentLeaveRequest extends Model
 {
     use HasFactory;
+
     protected $table = 'students_leave_requests';
     protected $primaryKey = 'id';
     public $timestamps = true;
-    protected $cast = [
+
+    protected $casts = [
         'leave_date'    => 'datetime',
         'end_date'      => 'datetime',
         'decision_date' => 'datetime',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
-        'student_id'      =>'integer',
     ];
 
     protected $fillable = [
-        'id',
         'student_id',
         'leave_type',
         'leave_date',
@@ -32,6 +32,9 @@ class StudentLeaveRequest extends Model
         'remarks',
         'approver_id',
         'decision_date',
+        'class_id',
+        'section_id',
+        'academic_year_id',
     ];
 
     public function student()
@@ -43,16 +46,19 @@ class StudentLeaveRequest extends Model
     {
         return $this->belongsTo(\App\Models\User::class, 'approver_id');
     }
+
     public function class()
     {
-        return $this->belongsTo('App\Models\Classes\Classes', 'class_id');
+        return $this->belongsTo(\App\Models\Classes\Classes::class, 'class_id');
     }
-    public function academic()
-    {
-        return $this->belongsTo('App\Models\AcademicYear', 'academic_year_id');
-    }
+
     public function section()
     {
-        return $this->belongsTo('App\Models\Section\Section', 'section_id');
+        return $this->belongsTo(\App\Models\Section\Section::class, 'section_id');
+    }
+
+    public function academic()
+    {
+        return $this->belongsTo(\App\Models\AcademicYear::class, 'academic_year_id');
     }
 }
