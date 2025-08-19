@@ -28,6 +28,7 @@ class Exam extends Model
     'section',
     'subject',
     'date',
+    'exam_type',
     'pass_mark',
     'full_mark',
     'start_time',

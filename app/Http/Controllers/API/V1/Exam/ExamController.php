@@ -12,7 +12,7 @@ class ExamController extends Controller
     public function index()
     {
         try {
-            $exams = Exam::all();
+            $exams = Exam::with(['classInfo', 'sectionInfo', 'subjectInfo'])->get();
 
             return response()->json([
                 'data' => $exams->map(function ($exam) {
@@ -34,6 +34,7 @@ class ExamController extends Controller
                 'startTime'   => 'nullable|string',
                 'duration'    => 'nullable|string',
                 'examType'    => 'required|string|max:255',
+
                 'subjects'    => 'required|array|min:1',
                 'subjects.*.subjectId' => 'required|integer|exists:subjects,id',
                 'subjects.*.date'      => 'required|date',
@@ -46,9 +47,9 @@ class ExamController extends Controller
 
             foreach ($validated['subjects'] as $subject) {
                 $data = [
-                    'class'      => $validated['classId'] ?? null,
-                    'section'    => $validated['sectionId'] ?? null,
-                    'subject'    => $subject['subjectId'],
+                    'class_id'   => $validated['classId'] ?? null,
+                    'section_id' => $validated['sectionId'] ?? null,
+                    'subject_id' => $subject['subjectId'],
                     'date'       => $subject['date'],
                     'pass_mark'  => $subject['passMark'] ?? null,
                     'full_mark'  => $subject['fullMark'] ?? null,
@@ -67,15 +68,20 @@ class ExamController extends Controller
                 'data'    => $createdExams,
             ], 201);
         } catch (\Exception $e) {
-            Log::error('Error creating exams: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Failed to create exams'], 500);
+            // Show real error in development
+            return response()->json([
+                'message' => 'Failed to create exams',
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString()
+            ], 500);
         }
     }
 
     public function show($id)
     {
         try {
-            $exam = Exam::find($id);
+            $exam = Exam::with(['classInfo', 'sectionInfo', 'subjectInfo'])->find($id);
+
             if (! $exam) {
                 return response()->json(['message' => 'Exam not found'], 404);
             }
@@ -98,35 +104,30 @@ class ExamController extends Controller
             }
 
             $validated = $request->validate([
-                'class'      => 'nullable|string',
-                'section'    => 'nullable|string',
-                'subject'    => 'nullable|string',
-                'date'       => 'nullable|date',
-                'passMark'   => 'nullable|integer',
-                'fullMark'   => 'nullable|integer',
-                'startTime'  => 'nullable|string',
-                'duration'   => 'nullable|string',
-                'roomNo'     => 'nullable|string',
-                'examType'   => 'nullable|string|max:255',
+                'classId'   => 'nullable|integer|exists:classes,id',
+                'sectionId' => 'nullable|integer|exists:sections,id',
+                'subjectId' => 'nullable|integer|exists:subjects,id',
+                'date'      => 'nullable|date',
+                'passMark'  => 'nullable|integer',
+                'fullMark'  => 'nullable|integer',
+                'startTime' => 'nullable|string',
+                'duration'  => 'nullable|string',
+                'roomNo'    => 'nullable|string',
+                'examType'  => 'nullable|string|max:255',
             ]);
 
-            $fieldsMap = [
-                'class'     => 'class',
-                'section'   => 'section',
-                'subject'   => 'subject',
-                'date'      => 'date',
-                'passMark'  => 'pass_mark',
-                'fullMark'  => 'full_mark',
-                'startTime' => 'start_time',
-                'duration'  => 'duration',
-                'roomNo'    => 'room_no',
-                'examType'  => 'exam_type',
+            $data = [
+                'class_id'   => $validated['classId'] ?? $exam->class_id,
+                'section_id' => $validated['sectionId'] ?? $exam->section_id,
+                'subject_id' => $validated['subjectId'] ?? $exam->subject_id,
+                'date'       => $validated['date'] ?? $exam->date,
+                'pass_mark'  => $validated['passMark'] ?? $exam->pass_mark,
+                'full_mark'  => $validated['fullMark'] ?? $exam->full_mark,
+                'start_time' => $validated['startTime'] ?? $exam->start_time,
+                'duration'   => $validated['duration'] ?? $exam->duration,
+                'room_no'    => $validated['roomNo'] ?? $exam->room_no,
+                'exam_type'  => $validated['examType'] ?? $exam->exam_type,
             ];
-
-            $data = [];
-            foreach ($fieldsMap as $inputKey => $dbColumn) {
-                $data[$dbColumn] = $validated[$inputKey] ?? $exam->$dbColumn;
-            }
 
             $exam->update($data);
 
@@ -135,8 +136,10 @@ class ExamController extends Controller
                 'data'    => $this->formatResponse($exam),
             ]);
         } catch (\Exception $e) {
-            Log::error("Error updating exam ID {$id}: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Failed to update exam'], 500);
+            return response()->json([
+                'message' => 'Failed to update exam',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -152,8 +155,10 @@ class ExamController extends Controller
 
             return response()->json(['message' => 'Exam deleted successfully']);
         } catch (\Exception $e) {
-            Log::error("Error deleting exam ID {$id}: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Failed to delete exam'], 500);
+            return response()->json([
+                'message' => 'Failed to delete exam',
+                'error'   => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -161,15 +166,15 @@ class ExamController extends Controller
     {
         return [
             'id'          => $exam->id,
-            'classId'     => $exam->class ? (int) $exam->class : null,
+            'classId'     => $exam->class_id,
             'className'   => optional($exam->classInfo)->class_name,
-            'sectionId'   => $exam->section ? (int) $exam->section : null,
+            'sectionId'   => $exam->section_id,
             'sectionName' => optional($exam->sectionInfo)->section_name,
-            'subjectId'   => $exam->subject ? (int) $exam->subject : null,
+            'subjectId'   => $exam->subject_id,
             'subjectName' => optional($exam->subjectInfo)->name,
             'date'        => $exam->date,
-            'passMark'    => $exam->pass_mark !== null ? (int) $exam->pass_mark : null,
-            'fullMark'    => $exam->full_mark !== null ? (int) $exam->full_mark : null,
+            'passMark'    => $exam->pass_mark,
+            'fullMark'    => $exam->full_mark,
             'startTime'   => $exam->start_time,
             'duration'    => $exam->duration,
             'roomNo'      => $exam->room_no,
