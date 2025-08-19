@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\API\V1\Student;
-
 use App\Enums\StudentStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Student\StudentPersonalInfo;
@@ -24,6 +23,7 @@ class StudentPersonalInfoController extends Controller
         return [
             'id' => $student->id,
             'academicYearId' => $student->academic_year_id,
+            'academicYearName'=> $student->academic->academic_year,
             'admissionNumber' => $student->admission_number,
             'admissionDate' => $student->admission_date,
             'rollNo' => $student->roll_no,

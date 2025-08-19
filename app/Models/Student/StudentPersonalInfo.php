@@ -43,7 +43,7 @@ class StudentPersonalInfo extends Model
     {
         return $this->belongsTo('App\Models\Classes\Classes', 'class_id');
     }
-    public function Academic()
+    public function academic()
     {
         return $this->belongsTo('App\Models\AcademicYear', 'academic_year_id');
     }
