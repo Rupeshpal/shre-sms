@@ -18,6 +18,11 @@ class Exam extends Model
     protected $keyType = 'int';
     protected $table = 'exams';
 
+    protected $casts=[
+        
+
+    ];
+
  protected $fillable = [
     'class',
     'section',

@@ -51,7 +51,7 @@ class AssignmentController extends Controller
                 'subjectId' => 'required|exists:subjects,id',
                 'sectionId' => 'required|exists:sections,id',
                 'classId' => 'required|exists:classes,id',
-                'maxMarks' => 'required|integer|min:0',
+                'maxMarks' => 'required|integer|min:0',   //this is updated and added
                 'dueDate' => 'required|date',
                 'attachment' => 'nullable|string|max:255',
             ]);

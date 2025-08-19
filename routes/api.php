@@ -37,6 +37,7 @@ use App\Http\Controllers\API\V1\Classes\ClassController;
 use App\Http\Controllers\API\V1\Teacher\AddressController;
 use App\Http\Controllers\API\V1\Teacher\TeacherDocController;
 use App\Http\Controllers\API\V1\Teacher\TeacherTransportController;
+use App\Http\Controllers\API\V1\Teacher\PreviousSchoolInfoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +87,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('student-siblings', StudentSiblingController::class);
         Route::apiResource('student-transports', StudentTransportController::class);
         Route::apiResource('student-addresses', StudentAddressController::class);
+        Route::apiResource('student-previous-info', PreviousSchoolInfoController::class);
         Route::apiResource('previous-school-details', PreviousSchoolDetailController::class);
         Route::apiResource('student-leave-requests', StudentLeaveRequestController::class);
         Route::apiResource('exams', \App\Http\Controllers\API\V1\Exam\ExamController::class);

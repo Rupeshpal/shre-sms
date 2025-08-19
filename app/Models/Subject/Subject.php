@@ -21,4 +21,12 @@ class Subject extends Model
         'pass_mark_practical',
         'status',
     ];
+
+    protected $casts = [
+        'full_mark_theory'     => 'integer',
+        'full_mark_practical'  => 'integer',
+        'pass_mark_theory'     => 'integer',
+        'pass_mark_practical'  => 'integer',
+        'status'               => 'boolean', 
+    ];
 }
