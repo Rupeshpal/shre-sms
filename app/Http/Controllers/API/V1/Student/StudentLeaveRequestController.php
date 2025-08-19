@@ -49,15 +49,23 @@ class StudentLeaveRequestController extends Controller
 
     public function index()
     {
-        $leaves = StudentLeaveRequest::with(['student', 'class', 'section', 'academic'])
-            ->get()
-            ->map(fn($leave) => $this->formatResponse($leave));
+        try {
+            $leaves = StudentLeaveRequest::with(['student', 'class', 'section', 'academic'])
+                ->get()
+                ->map(fn($leave) => $this->formatResponse($leave));
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Leave requests fetched successfully',
-            'data' => $leaves,
-        ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Leave requests fetched successfully',
+                'data' => $leaves,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch leave requests',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function store(Request $request)
@@ -77,86 +85,116 @@ class StudentLeaveRequestController extends Controller
             'class_id' => 'required|exists:classes,id',
             'section_id' => 'required|exists:sections,id',
             'academic_year_id' => 'required|exists:academic_years,id',
-        ])->validate();
+        ]);
 
-        $leave = StudentLeaveRequest::create($validator->validated());
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Leave request created successfully',
-            'data' => $this->formatResponse($leave->load(['student','class','section','academic'])),
-        ], 201);
+        try {
+            $leave = StudentLeaveRequest::create($validator->validated());
+            $leave->load(['student','class','section','academic']);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Leave request created successfully',
+                'data' => $this->formatResponse($leave),
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to create leave request',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function show($id)
     {
-        $leave = StudentLeaveRequest::with(['student', 'class', 'section', 'academic'])->find($id);
+        try {
+            $leave = StudentLeaveRequest::with(['student', 'class', 'section', 'academic'])->findOrFail($id);
 
-        if (!$leave) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Leave request fetched successfully',
+                'data' => $this->formatResponse($leave),
+            ]);
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Leave request not found',
+                'error' => $e->getMessage(),
             ], 404);
         }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Leave request fetched successfully',
-            'data' => $this->formatResponse($leave),
-        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $leave = StudentLeaveRequest::find($id);
-        if (!$leave) {
+        try {
+            $leave = StudentLeaveRequest::findOrFail($id);
+
+            $data = $this->convertCamelToSnake($request->all());
+
+            $validator = Validator::make($data, [
+                'student_id' => 'sometimes|required|exists:student_personal_info,id',
+                'leave_type' => 'sometimes|required|in:sick,casual,earned,maternity,other',
+                'leave_date' => 'sometimes|required|date',
+                'end_date' => 'nullable|date',
+                'no_of_days' => 'nullable|integer',
+                'status' => 'nullable|in:pending,approved,rejected',
+                'remarks' => 'nullable|string',
+                'approver_id' => 'nullable|exists:users,id',
+                'decision_date' => 'nullable|date',
+                'class_id' => 'sometimes|required|exists:classes,id',
+                'section_id' => 'sometimes|required|exists:sections,id',
+                'academic_year_id' => 'sometimes|required|exists:academic_years,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            $leave->update($validator->validated());
+            $leave->load(['student','class','section','academic']);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Leave request updated successfully',
+                'data' => $this->formatResponse($leave),
+            ]);
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Leave request not found',
-            ], 404);
+                'message' => 'Failed to update leave request',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $data = $this->convertCamelToSnake($request->all());
-
-        $validator = Validator::make($data, [
-            'student_id' => 'sometimes|required|exists:student_personal_info,id',
-            'leave_type' => 'sometimes|required|in:sick,casual,earned,maternity,other',
-            'leave_date' => 'sometimes|required|date',
-            'end_date' => 'nullable|date',
-            'no_of_days' => 'nullable|integer',
-            'status' => 'nullable|in:pending,approved,rejected',
-            'remarks' => 'nullable|string',
-            'approver_id' => 'nullable|exists:users,id',
-            'decision_date' => 'nullable|date',
-            'class_id' => 'sometimes|required|exists:classes,id',
-            'section_id' => 'sometimes|required|exists:sections,id',
-            'academic_year_id' => 'sometimes|required|exists:academic_years,id',
-        ])->validate();
-
-        $leave->update($validator->validated());
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Leave request updated successfully',
-            'data' => $this->formatResponse($leave->fresh(['student','class','section','academic'])),
-        ]);
     }
 
     public function destroy($id)
     {
-        $leave = StudentLeaveRequest::find($id);
-        if (!$leave) {
+        try {
+            $leave = StudentLeaveRequest::findOrFail($id);
+            $leave->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Leave request deleted successfully',
+            ]);
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Leave request not found',
-            ], 404);
+                'message' => 'Failed to delete leave request',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $leave->delete();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Leave request deleted successfully',
-        ]);
     }
 }

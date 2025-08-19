@@ -19,6 +19,8 @@ class StudentLeaveRequest extends Model
         'decision_date' => 'datetime',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
+        'student_id'    => 'integer',
+        'approver_id'   =>'integer',
     ];
 
     protected $fillable = [
