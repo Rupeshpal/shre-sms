@@ -40,6 +40,8 @@ class StudentLeaveRequestController extends Controller
             'status' => $leave->status,
             'remarks' => $leave->remarks,
             'approverId' => $leave->approver_id,
+            'approverName' =>optional($leave->approver)->name,
+            'approverEamil' =>optional($leave->approver)->eamil,
             'decisionDate' => $leave->decision_date?->toIso8601String(),
             'createdAt' => $leave->created_at?->toIso8601String(),
             'updatedAt' => $leave->updated_at?->toIso8601String(),
