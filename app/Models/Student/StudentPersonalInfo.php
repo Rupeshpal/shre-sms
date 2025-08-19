@@ -21,7 +21,7 @@ class StudentPersonalInfo extends Model
     ];
 
     protected $fillable = [
-        'academic_year',
+        'academic_year_id',
         'admission_number',
         'admission_date',
         'roll_no',
@@ -43,7 +43,10 @@ class StudentPersonalInfo extends Model
     {
         return $this->belongsTo('App\Models\Classes\Classes', 'class_id');
     }
-
+    public function Academic()
+    {
+        return $this->belongsTo('App\Models\AcademicYear', 'academic_year_id');
+    }
     public function section()
     {
         return $this->belongsTo('App\Models\Section\Section', 'section_id');

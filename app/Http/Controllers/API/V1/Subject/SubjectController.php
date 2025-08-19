@@ -19,33 +19,47 @@ class SubjectController extends Controller
     private function formatResponse(Subject $subject): array
     {
         return [
-            'id'               => $subject->id,
-            'name'             => $subject->name,
-            'code'             => $subject->code,
-            'type'             => $subject->type,
-            'fullMarkTheory'   => $subject->full_mark_theory,
-            'fullMarkPractical'=> $subject->full_mark_practical,
-            'passMarkTheory'   => $subject->pass_mark_theory,
-            'passMarkPractical'=> $subject->pass_mark_practical,
-            'status'           => $subject->status,
-            'createdAt'        => $subject->created_at?->toIso8601String(),
-            'updatedAt'        => $subject->updated_at?->toIso8601String(),
+            'id'                => $subject->id,
+            'name'              => $subject->name,
+            'code'              => $subject->code,
+            'type'              => $subject->type,
+            'fullMarkTheory'    => $subject->full_mark_theory,
+            'fullMarkPractical' => $subject->full_mark_practical,
+            'passMarkTheory'    => $subject->pass_mark_theory,
+            'passMarkPractical' => $subject->pass_mark_practical,
+            'status'            => (bool) $subject->status,
+            'createdAt'         => $subject->created_at?->toIso8601String(),
+            'updatedAt'         => $subject->updated_at?->toIso8601String(),
         ];
     }
 
     public function index()
     {
         $subjects = Subject::all()->map(fn($subject) => $this->formatResponse($subject));
-        return response()->json($subjects);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Subjects fetched successfully',
+            'data'    => $subjects,
+        ]);
     }
 
     public function show($id)
     {
         $subject = Subject::find($id);
+
         if (!$subject) {
-            return response()->json(['message' => 'Subject not found'], 404);
+            return response()->json([
+                'status'  => false,
+                'message' => 'Subject not found',
+            ], 404);
         }
-        return response()->json($this->formatResponse($subject));
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Subject fetched successfully',
+            'data'    => $this->formatResponse($subject),
+        ]);
     }
 
     public function store(Request $request)
@@ -55,7 +69,7 @@ class SubjectController extends Controller
 
             $validated = validator($data, [
                 'name'                 => 'required|string|max:100',
-                'code'                 => 'required|string|max:20',
+                'code'                 => 'required|string|max:20|unique:subjects,code',
                 'type'                 => 'required|in:Theory,Practical,Both',
                 'full_mark_theory'     => 'nullable|integer',
                 'full_mark_practical'  => 'nullable|integer',
@@ -64,27 +78,26 @@ class SubjectController extends Controller
                 'status'               => 'nullable|boolean',
             ])->validate();
 
-            if (Subject::where('code', $validated['code'])->exists()) {
-                $validated['code'] .= '_' . uniqid();
-            }
-
             $subject = Subject::create($validated);
 
             return response()->json([
+                'status'  => true,
                 'message' => 'Subject created successfully',
-                'data'    => $this->formatResponse($subject)
+                'data'    => $this->formatResponse($subject),
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
+                'status'  => false,
                 'message' => 'Validation failed',
-                'errors'  => $e->errors()
+                'errors'  => $e->errors(),
             ], 422);
 
         } catch (\Exception $e) {
             return response()->json([
+                'status'  => false,
                 'message' => 'Unexpected error occurred',
-                'error'   => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -93,7 +106,10 @@ class SubjectController extends Controller
     {
         $subject = Subject::find($id);
         if (!$subject) {
-            return response()->json(['message' => 'Subject not found'], 404);
+            return response()->json([
+                'status'  => false,
+                'message' => 'Subject not found',
+            ], 404);
         }
 
         $data = $this->convertCamelToSnake($request->all());
@@ -111,18 +127,28 @@ class SubjectController extends Controller
 
         $subject->update($validated);
 
-        return response()->json($this->formatResponse($subject));
+        return response()->json([
+            'status'  => true,
+            'message' => 'Subject updated successfully',
+            'data'    => $this->formatResponse($subject),
+        ]);
     }
 
     public function destroy($id)
     {
         $subject = Subject::find($id);
         if (!$subject) {
-            return response()->json(['message' => 'Subject not found'], 404);
+            return response()->json([
+                'status'  => false,
+                'message' => 'Subject not found',
+            ], 404);
         }
 
         $subject->delete();
 
-        return response()->json(['message' => 'Subject deleted successfully']);
+        return response()->json([
+            'status'  => true,
+            'message' => 'Subject deleted successfully',
+        ]);
     }
 }

@@ -1,27 +1,29 @@
 <?php
 
 namespace App\Http\Controllers\API\V1\Student;
+
 use App\Enums\StudentStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Student\StudentPersonalInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\QueryException;
 use Exception;
 
 class StudentPersonalInfoController extends Controller
 {
     private function convertCamelToSnake(array $input): array
     {
-        return collect($input)->mapWithKeys(fn($value, $key) => [Str::snake($key) => $value])->toArray();
+        return collect($input)
+            ->mapWithKeys(fn($value, $key) => [Str::snake($key) => $value])
+            ->toArray();
     }
 
     private function formatResponse(StudentPersonalInfo $student): array
     {
         return [
             'id' => $student->id,
-            'academicYear' => $student->academic_year,
+            'academicYearId' => $student->academic_year_id,
             'admissionNumber' => $student->admission_number,
             'admissionDate' => $student->admission_date,
             'rollNo' => $student->roll_no,
@@ -36,7 +38,6 @@ class StudentPersonalInfoController extends Controller
                 'sectionId' => $student->section_id,
                 'sectionName' => $student->section->section_name ?? null
             ],
-
             'gender' => $student->gender,
             'dateOfBirth' => $student->date_of_birth,
             'bloodGroup' => $student->blood_group,
@@ -66,7 +67,7 @@ class StudentPersonalInfoController extends Controller
         $input = $this->convertCamelToSnake($request->all());
 
         $validator = Validator::make($input, [
-            'academic_year' => 'required|string|max:20',
+            'academic_year_id' => 'required|integer|exists:academic_years,id',
             'admission_number' => 'required|string|max:50',
             'admission_date' => 'required|date',
             'roll_no' => 'required|string|max:20',
@@ -141,15 +142,15 @@ class StudentPersonalInfoController extends Controller
         $input = $this->convertCamelToSnake($request->all());
 
         $validator = Validator::make($input, [
-            'academic_year' => 'nullable|string|max:20',
+            'academic_year_id' => 'sometimes|required|integer|exists:academic_years,id',
             'admission_number' => 'nullable|string|max:50',
             'admission_date' => 'nullable|date',
             'roll_no' => 'nullable|string|max:20',
             'status' => 'nullable|string|in:' . implode(',', StudentStatusEnum::values()),
-            'first_name' => 'sometimes|required|string|max:100',
+            'first_name' => 'nullable|string|max:100',
             'last_name' => 'nullable|string|max:100',
-            'class_id' => 'required|integer|exists:classes,id',
-            'section_id' => 'required|integer|exists:sections,id',
+            'class_id' => 'nullable|integer|exists:classes,id',
+            'section_id' => 'nullable|integer|exists:sections,id',
             'gender' => 'nullable|string|max:40',
             'date_of_birth' => 'nullable|date',
             'blood_group' => 'nullable|string|max:5',
