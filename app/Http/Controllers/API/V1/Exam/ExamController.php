@@ -165,11 +165,11 @@ class ExamController extends Controller
     {
         return [
             'id'          => $exam->id,
-            'classId'     => $exam->class_id,
+            'classId'     => $exam->class,
             'className'   => optional($exam->classInfo)->class_name,
-            'sectionId'   => $exam->section_id,
+            'sectionId'   => $exam->section,
             'sectionName' => optional($exam->sectionInfo)->section_name,
-            'subjectId'   => $exam->subject_id,
+            'subjectId'   => $exam->subject,
             'subjectName' => optional($exam->subjectInfo)->name,
             'date'        => $exam->date,
             'passMark'    => $exam->pass_mark,
