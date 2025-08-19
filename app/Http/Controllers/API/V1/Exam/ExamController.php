@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\V1\Exam;
 use App\Http\Controllers\Controller;
 use App\Models\Exam\Exam;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;   // 👈 Add Log
+use Illuminate\Support\Facades\Log;
 
 class ExamController extends Controller
 {
@@ -33,6 +33,7 @@ class ExamController extends Controller
                 'sectionId'   => 'nullable|integer|exists:sections,id',
                 'startTime'   => 'nullable|string',
                 'duration'    => 'nullable|string',
+                'examType'    => 'required|string|max:255',
                 'subjects'    => 'required|array|min:1',
                 'subjects.*.subjectId' => 'required|integer|exists:subjects,id',
                 'subjects.*.date'      => 'required|date',
@@ -54,6 +55,7 @@ class ExamController extends Controller
                     'start_time' => $validated['startTime'] ?? null,
                     'duration'   => $validated['duration'] ?? null,
                     'room_no'    => $subject['roomNo'] ?? null,
+                    'exam_type'  => $validated['examType'],
                 ];
 
                 $exam = Exam::create($data);
@@ -105,6 +107,7 @@ class ExamController extends Controller
                 'startTime'  => 'nullable|string',
                 'duration'   => 'nullable|string',
                 'roomNo'     => 'nullable|string',
+                'examType'   => 'nullable|string|max:255',
             ]);
 
             $fieldsMap = [
@@ -117,6 +120,7 @@ class ExamController extends Controller
                 'startTime' => 'start_time',
                 'duration'  => 'duration',
                 'roomNo'    => 'room_no',
+                'examType'  => 'exam_type',
             ];
 
             $data = [];
@@ -169,6 +173,7 @@ class ExamController extends Controller
             'startTime'   => $exam->start_time,
             'duration'    => $exam->duration,
             'roomNo'      => $exam->room_no,
+            'examType'    => $exam->exam_type,
         ];
     }
 }
