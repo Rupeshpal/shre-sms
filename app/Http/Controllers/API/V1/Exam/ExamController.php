@@ -15,13 +15,19 @@ class ExamController extends Controller
             $exams = Exam::with(['classInfo', 'sectionInfo', 'subjectInfo'])->get();
 
             return response()->json([
-                'data' => $exams->map(function ($exam) {
+                'status'  => true,
+                'message' => 'Exams fetched successfully',
+                'data'    => $exams->map(function ($exam) {
                     return $this->formatResponse($exam);
                 }),
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching exams: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Failed to fetch exams'], 500);
+            return response()->json([
+                'status'  => false,
+                'message' => 'Failed to fetch exams',
+                'data'    => [],
+            ], 500);
         }
     }
 
@@ -46,9 +52,9 @@ class ExamController extends Controller
 
             foreach ($validated['subjects'] as $subject) {
                 $data = [
-                    'class'   => $validated['classId'] ?? null,
-                    'section' => $validated['sectionId'] ?? null,
-                    'subject' => $subject['subjectId'],
+                    'class'      => $validated['classId'] ?? null,
+                    'section'    => $validated['sectionId'] ?? null,
+                    'subject'    => $subject['subjectId'],
                     'date'       => $subject['date'],
                     'pass_mark'  => $subject['passMark'] ?? null,
                     'full_mark'  => $subject['fullMark'] ?? null,
@@ -63,15 +69,16 @@ class ExamController extends Controller
             }
 
             return response()->json([
+                'status'  => true,
                 'message' => 'Exams created successfully',
                 'data'    => $createdExams,
             ], 201);
         } catch (\Exception $e) {
-            // Show real error in development
             return response()->json([
+                'status'  => false,
                 'message' => 'Failed to create exams',
+                'data'    => [],
                 'error'   => $e->getMessage(),
-                'trace'   => $e->getTraceAsString()
             ], 500);
         }
     }
@@ -82,15 +89,25 @@ class ExamController extends Controller
             $exam = Exam::with(['classInfo', 'sectionInfo', 'subjectInfo'])->find($id);
 
             if (! $exam) {
-                return response()->json(['message' => 'Exam not found'], 404);
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Exam not found',
+                    'data'    => [],
+                ], 404);
             }
 
             return response()->json([
-                'data' => $this->formatResponse($exam),
+                'status'  => true,
+                'message' => 'Exam fetched successfully',
+                'data'    => $this->formatResponse($exam),
             ]);
         } catch (\Exception $e) {
             Log::error("Error fetching exam ID {$id}: " . $e->getMessage());
-            return response()->json(['message' => 'Failed to fetch exam'], 500);
+            return response()->json([
+                'status'  => false,
+                'message' => 'Failed to fetch exam',
+                'data'    => [],
+            ], 500);
         }
     }
 
@@ -99,7 +116,11 @@ class ExamController extends Controller
         try {
             $exam = Exam::find($id);
             if (! $exam) {
-                return response()->json(['message' => 'Exam not found'], 404);
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Exam not found',
+                    'data'    => [],
+                ], 404);
             }
 
             $validated = $request->validate([
@@ -116,9 +137,9 @@ class ExamController extends Controller
             ]);
 
             $data = [
-                'class'   => $validated['classId'] ?? $exam->class_id,
-                'section' => $validated['sectionId'] ?? $exam->section_id,
-                'subject' => $validated['subjectId'] ?? $exam->subject_id,
+                'class'      => $validated['classId'] ?? $exam->class_id,
+                'section'    => $validated['sectionId'] ?? $exam->section_id,
+                'subject'    => $validated['subjectId'] ?? $exam->subject_id,
                 'date'       => $validated['date'] ?? $exam->date,
                 'pass_mark'  => $validated['passMark'] ?? $exam->pass_mark,
                 'full_mark'  => $validated['fullMark'] ?? $exam->full_mark,
@@ -131,13 +152,16 @@ class ExamController extends Controller
             $exam->update($data);
 
             return response()->json([
+                'status'  => true,
                 'message' => 'Exam updated successfully',
                 'data'    => $this->formatResponse($exam),
             ]);
         } catch (\Exception $e) {
             return response()->json([
+                'status'  => false,
                 'message' => 'Failed to update exam',
-                'error'   => $e->getMessage()
+                'data'    => [],
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
@@ -147,16 +171,26 @@ class ExamController extends Controller
         try {
             $exam = Exam::find($id);
             if (! $exam) {
-                return response()->json(['message' => 'Exam not found'], 404);
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Exam not found',
+                    'data'    => [],
+                ], 404);
             }
 
             $exam->delete();
 
-            return response()->json(['message' => 'Exam deleted successfully']);
+            return response()->json([
+                'status'  => true,
+                'message' => 'Exam deleted successfully',
+                'data'    => [],
+            ]);
         } catch (\Exception $e) {
             return response()->json([
+                'status'  => false,
                 'message' => 'Failed to delete exam',
-                'error'   => $e->getMessage()
+                'data'    => [],
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
