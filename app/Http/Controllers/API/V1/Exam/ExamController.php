@@ -34,7 +34,6 @@ class ExamController extends Controller
                 'startTime'   => 'nullable|string',
                 'duration'    => 'nullable|string',
                 'examType'    => 'required|string|max:255',
-
                 'subjects'    => 'required|array|min:1',
                 'subjects.*.subjectId' => 'required|integer|exists:subjects,id',
                 'subjects.*.date'      => 'required|date',
@@ -47,9 +46,9 @@ class ExamController extends Controller
 
             foreach ($validated['subjects'] as $subject) {
                 $data = [
-                    'class_id'   => $validated['classId'] ?? null,
-                    'section_id' => $validated['sectionId'] ?? null,
-                    'subject_id' => $subject['subjectId'],
+                    'class'   => $validated['classId'] ?? null,
+                    'section' => $validated['sectionId'] ?? null,
+                    'subject' => $subject['subjectId'],
                     'date'       => $subject['date'],
                     'pass_mark'  => $subject['passMark'] ?? null,
                     'full_mark'  => $subject['fullMark'] ?? null,
@@ -117,9 +116,9 @@ class ExamController extends Controller
             ]);
 
             $data = [
-                'class_id'   => $validated['classId'] ?? $exam->class_id,
-                'section_id' => $validated['sectionId'] ?? $exam->section_id,
-                'subject_id' => $validated['subjectId'] ?? $exam->subject_id,
+                'class'   => $validated['classId'] ?? $exam->class_id,
+                'section' => $validated['sectionId'] ?? $exam->section_id,
+                'subject' => $validated['subjectId'] ?? $exam->subject_id,
                 'date'       => $validated['date'] ?? $exam->date,
                 'pass_mark'  => $validated['passMark'] ?? $exam->pass_mark,
                 'full_mark'  => $validated['fullMark'] ?? $exam->full_mark,
