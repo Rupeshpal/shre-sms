@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API\V1\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Teacher\Teacher;
+use App\Models\Teacher\TeacherAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -13,7 +14,7 @@ class TeacherController extends Controller
 {
     public function index()
     {
-        $teachers = Teacher::all();
+        $teachers = Teacher::with('assignments')->get();
 
         return response()->json([
             'data' => $teachers->map(fn ($teacher) => $this->formatResponse($teacher))
@@ -22,7 +23,7 @@ class TeacherController extends Controller
 
     public function show($id)
     {
-        $teacher = Teacher::find($id);
+        $teacher = Teacher::with('assignments')->find($id);
         if (!$teacher) {
             return response()->json(['message' => 'Teacher not found'], 404);
         }
@@ -53,35 +54,49 @@ class TeacherController extends Controller
                 'house'            => 'nullable|string|max:50',
                 'motherTongue'     => 'nullable|string|max:50',
                 'status'           => 'nullable|boolean',
+
+                // assignments
+                'assignments'                  => 'nullable|array',
+                'assignments.*.subject_id'     => 'required|integer',
+                'assignments.*.class_id'       => 'required|integer',
+                'assignments.*.section_id'     => 'required|integer',
             ]);
 
             $teacherCode = $validated['teacherCode'] ?? $this->generateTeacherCode();
 
             $data = [
-                'teacher_code'      => $teacherCode,
-                'first_name'        => $validated['firstName'],
-                'last_name'         => $validated['lastName'],
-                'email'             => $validated['email'] ?? null,
-                'primary_contact'   => $validated['primaryContact'] ?? null,
-                'gender'            => $validated['gender'] ?? null,
-                'blood_group'       => $validated['bloodGroup'] ?? null,
-                'date_of_birth'     => $validated['dateOfBirth'] ?? null,
-                'date_of_joining'   => $validated['dateOfJoining'] ?? null,
-                'marital_status'    => $validated['maritalStatus'] ?? null,
-                'qualification'     => $validated['qualification'] ?? null,
-                'work_experience'   => $validated['workExperience'] ?? null,
-                'father_name'       => $validated['fatherName'] ?? null,
-                'mother_name'       => $validated['motherName'] ?? null,
-                'house'             => $validated['house'] ?? null,
-                'mother_tongue'     => $validated['motherTongue'] ?? null,
-                'status'            => $validated['status'] ?? true,
+                'teacher_code'    => $teacherCode,
+                'first_name'      => $validated['firstName'],
+                'last_name'       => $validated['lastName'],
+                'email'           => $validated['email'] ?? null,
+                'primary_contact' => $validated['primaryContact'] ?? null,
+                'gender'          => $validated['gender'] ?? null,
+                'blood_group'     => $validated['bloodGroup'] ?? null,
+                'date_of_birth'   => $validated['dateOfBirth'] ?? null,
+                'date_of_joining' => $validated['dateOfJoining'] ?? null,
+                'marital_status'  => $validated['maritalStatus'] ?? null,
+                'qualification'   => $validated['qualification'] ?? null,
+                'work_experience' => $validated['workExperience'] ?? null,
+                'father_name'     => $validated['fatherName'] ?? null,
+                'mother_name'     => $validated['motherName'] ?? null,
+                'house'           => $validated['house'] ?? null,
+                'mother_tongue'   => $validated['motherTongue'] ?? null,
+                'status'          => $validated['status'] ?? true,
             ];
 
             $teacher = Teacher::create($data);
 
+            // save assignments
+            if (!empty($validated['assignments'])) {
+                foreach ($validated['assignments'] as $assignment) {
+                    $teacher->assignments()->create($assignment);
+                }
+            }
+
             return response()->json([
+                'status'=>true,
                 'message' => 'Teacher created successfully',
-                'data'    => $this->formatResponse($teacher),
+                'data'    => $this->formatResponse($teacher->load('assignments')),
             ], 201);
 
         } catch (ValidationException $e) {
@@ -121,33 +136,48 @@ class TeacherController extends Controller
                 'house'            => 'nullable|string|max:50',
                 'motherTongue'     => 'nullable|string|max:50',
                 'status'           => 'nullable|boolean',
+
+                // assignments
+                'assignments'                  => 'nullable|array',
+                'assignments.*.subject_id'     => 'required|integer',
+                'assignments.*.class_id'       => 'required|integer',
+                'assignments.*.section_id'     => 'required|integer',
             ]);
 
             $data = [
-                'teacher_code'      => $validated['teacherCode'] ?? $teacher->teacher_code,
-                'first_name'        => $validated['firstName'] ?? $teacher->first_name,
-                'last_name'         => $validated['lastName'] ?? $teacher->last_name,
-                'email'             => $validated['email'] ?? $teacher->email,
-                'primary_contact'   => $validated['primaryContact'] ?? $teacher->primary_contact,
-                'gender'            => $validated['gender'] ?? $teacher->gender,
-                'blood_group'       => $validated['bloodGroup'] ?? $teacher->blood_group,
-                'date_of_birth'     => $validated['dateOfBirth'] ?? $teacher->date_of_birth,
-                'date_of_joining'   => $validated['dateOfJoining'] ?? $teacher->date_of_joining,
-                'marital_status'    => $validated['maritalStatus'] ?? $teacher->marital_status,
-                'qualification'     => $validated['qualification'] ?? $teacher->qualification,
-                'work_experience'   => $validated['workExperience'] ?? $teacher->work_experience,
-                'father_name'       => $validated['fatherName'] ?? $teacher->father_name,
-                'mother_name'       => $validated['motherName'] ?? $teacher->mother_name,
-                'house'             => $validated['house'] ?? $teacher->house,
-                'mother_tongue'     => $validated['motherTongue'] ?? $teacher->mother_tongue,
-                'status'            => $validated['status'] ?? $teacher->status,
+                'teacher_code'    => $validated['teacherCode'] ?? $teacher->teacher_code,
+                'first_name'      => $validated['firstName'] ?? $teacher->first_name,
+                'last_name'       => $validated['lastName'] ?? $teacher->last_name,
+                'email'           => $validated['email'] ?? $teacher->email,
+                'primary_contact' => $validated['primaryContact'] ?? $teacher->primary_contact,
+                'gender'          => $validated['gender'] ?? $teacher->gender,
+                'blood_group'     => $validated['bloodGroup'] ?? $teacher->blood_group,
+                'date_of_birth'   => $validated['dateOfBirth'] ?? $teacher->date_of_birth,
+                'date_of_joining' => $validated['dateOfJoining'] ?? $teacher->date_of_joining,
+                'marital_status'  => $validated['maritalStatus'] ?? $teacher->marital_status,
+                'qualification'   => $validated['qualification'] ?? $teacher->qualification,
+                'work_experience' => $validated['workExperience'] ?? $teacher->work_experience,
+                'father_name'     => $validated['fatherName'] ?? $teacher->father_name,
+                'mother_name'     => $validated['motherName'] ?? $teacher->mother_name,
+                'house'           => $validated['house'] ?? $teacher->house,
+                'mother_tongue'   => $validated['motherTongue'] ?? $teacher->mother_tongue,
+                'status'          => $validated['status'] ?? $teacher->status,
             ];
 
             $teacher->update($data);
 
+            // replace assignments
+            if ($request->has('assignments')) {
+                $teacher->assignments()->delete();
+                foreach ($validated['assignments'] as $assignment) {
+                    $teacher->assignments()->create($assignment);
+                }
+            }
+
             return response()->json([
+                'status' =>true,
                 'message' => 'Teacher updated successfully',
-                'data'    => $this->formatResponse($teacher),
+                'data'    => $this->formatResponse($teacher->load('assignments')),
             ]);
 
         } catch (ValidationException $e) {
@@ -167,7 +197,10 @@ class TeacherController extends Controller
 
         $teacher->delete();
 
-        return response()->json(['message' => 'Teacher deleted successfully']);
+        return response()->json([
+            'status'=>true,
+            'message' => 'Teacher deleted successfully'
+        ]);
     }
 
     protected function formatResponse($teacher)
@@ -191,6 +224,13 @@ class TeacherController extends Controller
             'house'           => $teacher->house,
             'motherTongue'    => $teacher->mother_tongue,
             'status'          => $teacher->status,
+            'assignments'     => $teacher->assignments->map(function ($a) {
+                return [
+                    'subject_id' => $a->subject_id,
+                    'class_id'   => $a->class_id,
+                    'section_id' => $a->section_id,
+                ];
+            }),
             'createdAt'       => optional($teacher->created_at)->toIso8601String(),
             'updatedAt'       => optional($teacher->updated_at)->toIso8601String(),
         ];
