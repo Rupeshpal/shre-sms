@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API\V1\Teacher;
 
 use App\Http\Controllers\Controller;
 use App\Models\Teacher\Teacher;
-use App\Models\Teacher\TeacherAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -56,10 +55,10 @@ class TeacherController extends Controller
                 'status'           => 'nullable|boolean',
 
                 // assignments
-                'assignments'                  => 'nullable|array',
-                'assignments.*.subject_id'     => 'required|integer',
-                'assignments.*.class_id'       => 'required|integer',
-                'assignments.*.section_id'     => 'required|integer',
+                'assignments'       => 'nullable|array',
+                'assignments.*.subjectId' => 'required|integer',
+                'assignments.*.classId'   => 'required|integer',
+                'assignments.*.sectionId' => 'required|integer',
             ]);
 
             $teacherCode = $validated['teacherCode'] ?? $this->generateTeacherCode();
@@ -89,14 +88,18 @@ class TeacherController extends Controller
             // save assignments
             if (!empty($validated['assignments'])) {
                 foreach ($validated['assignments'] as $assignment) {
-                    $teacher->assignments()->create($assignment);
+                    $teacher->assignments()->create([
+                        'subject_id' => $assignment['subjectId'],
+                        'class_id'   => $assignment['classId'],
+                        'section_id' => $assignment['sectionId'],
+                    ]);
                 }
             }
 
             return response()->json([
-                'status'=>true,
+                'status' => true,
                 'message' => 'Teacher created successfully',
-                'data'    => $this->formatResponse($teacher->load('assignments')),
+                'data' => $this->formatResponse($teacher->load('assignments')),
             ], 201);
 
         } catch (ValidationException $e) {
@@ -138,10 +141,10 @@ class TeacherController extends Controller
                 'status'           => 'nullable|boolean',
 
                 // assignments
-                'assignments'                  => 'nullable|array',
-                'assignments.*.subject_id'     => 'required|integer',
-                'assignments.*.class_id'       => 'required|integer',
-                'assignments.*.section_id'     => 'required|integer',
+                'assignments'       => 'nullable|array',
+                'assignments.*.subjectId' => 'required|integer',
+                'assignments.*.classId'   => 'required|integer',
+                'assignments.*.sectionId' => 'required|integer',
             ]);
 
             $data = [
@@ -170,14 +173,18 @@ class TeacherController extends Controller
             if ($request->has('assignments')) {
                 $teacher->assignments()->delete();
                 foreach ($validated['assignments'] as $assignment) {
-                    $teacher->assignments()->create($assignment);
+                    $teacher->assignments()->create([
+                        'subject_id' => $assignment['subjectId'],
+                        'class_id'   => $assignment['classId'],
+                        'section_id' => $assignment['sectionId'],
+                    ]);
                 }
             }
 
             return response()->json([
-                'status' =>true,
+                'status' => true,
                 'message' => 'Teacher updated successfully',
-                'data'    => $this->formatResponse($teacher->load('assignments')),
+                'data' => $this->formatResponse($teacher->load('assignments')),
             ]);
 
         } catch (ValidationException $e) {
@@ -198,7 +205,7 @@ class TeacherController extends Controller
         $teacher->delete();
 
         return response()->json([
-            'status'=>true,
+            'status' => true,
             'message' => 'Teacher deleted successfully'
         ]);
     }
@@ -226,9 +233,9 @@ class TeacherController extends Controller
             'status'          => $teacher->status,
             'assignments'     => $teacher->assignments->map(function ($a) {
                 return [
-                    'subject_id' => $a->subject_id,
-                    'class_id'   => $a->class_id,
-                    'section_id' => $a->section_id,
+                    'subjectId' => $a->subject_id,
+                    'classId'   => $a->class_id,
+                    'sectionId' => $a->section_id,
                 ];
             }),
             'createdAt'       => optional($teacher->created_at)->toIso8601String(),
@@ -240,7 +247,6 @@ class TeacherController extends Controller
     {
         $prefix = 'TC';
         $lastId = Teacher::max('id') ?? 0;
-        $code = $prefix . str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
-        return $code;
+        return $prefix . str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
     }
 }
