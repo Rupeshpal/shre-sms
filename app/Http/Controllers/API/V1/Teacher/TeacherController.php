@@ -233,15 +233,19 @@ class TeacherController extends Controller
             'status'          => $teacher->status,
             'assignments'     => $teacher->assignments->map(function ($a) {
                 return [
-                    'subjectId' => $a->subject_id,
-                    'classId'   => $a->class_id,
-                    'sectionId' => $a->section_id,
+                    'subjectId'   => $a->subject_id,
+                    'subjectName' => optional($a->subject)->name,
+                    'classId'     => $a->class_id,
+                    'className'   => optional($a->class)->class_name,
+                    'sectionId'   => $a->section_id,
+                    'sectionName' => optional($a->section)->section_name,
                 ];
             }),
             'createdAt'       => optional($teacher->created_at)->toIso8601String(),
             'updatedAt'       => optional($teacher->updated_at)->toIso8601String(),
         ];
     }
+    
 
     protected function generateTeacherCode()
     {
