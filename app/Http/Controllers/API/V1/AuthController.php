@@ -19,17 +19,17 @@ class AuthController extends Controller
                 'name'     => 'required|string|max:255',
                 'email'    => 'required|string|email|unique:users',
                 'phone'    => 'nullable|string|max:20',
-                'id'       => 'nullable|integer', // <-- Accept id
+                'userId'   => 'nullable|integer',
                 'role'     => 'required|string|in:admin,user,teacher,student,parent,superadmin',
                 'password' => 'required|string|confirmed|min:8',
             ]);
-
+            
             $user = User::create([
                 'name'     => $request->name,
                 'email'    => $request->email,
                 'phone'    => $request->phone,
                 'role'     => $request->role,
-                'user_id'  => $request->id, // <-- Save into DB column user_id
+                'user_id'  => $request->userId,
                 'password' => Hash::make($request->password),
             ]);
 
