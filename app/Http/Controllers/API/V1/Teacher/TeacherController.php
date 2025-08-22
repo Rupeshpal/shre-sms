@@ -1,14 +1,12 @@
 <?php
 
 namespace App\Http\Controllers\API\V1\Teacher;
-
 use App\Http\Controllers\Controller;
 use App\Models\Teacher\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
-
 class TeacherController extends Controller
 {
     public function index()

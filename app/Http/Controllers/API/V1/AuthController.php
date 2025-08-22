@@ -18,8 +18,9 @@ class AuthController extends Controller
             $request->validate([
                 'name'     => 'required|string|max:255',
                 'email'    => 'required|string|email|unique:users',
-                'phone'    => 'required|string|max:20',
-                'role'      => 'required|string|in:admin,user,teacher,student, parent,superadmin',
+                'phone'    => 'nullable|string|max:20',
+                'id'       => 'nullable|integer', // <-- Accept id
+                'role'     => 'required|string|in:admin,user,teacher,student,parent,superadmin',
                 'password' => 'required|string|confirmed|min:8',
             ]);
 
@@ -28,17 +29,25 @@ class AuthController extends Controller
                 'email'    => $request->email,
                 'phone'    => $request->phone,
                 'role'     => $request->role,
+                'user_id'  => $request->id, // <-- Save into DB column user_id
                 'password' => Hash::make($request->password),
             ]);
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json([
-                'success'       => true,
-                'version'       => 'v1',
-                'access_token'  => $token,
-                'token_type'    => 'Bearer',
-                'user'          => $user
+                'success'     => true,
+                'version'     => 'v1',
+                'accessToken' => $token,
+                'tokenType'   => 'Bearer',
+                'user'        => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'role'  => $user->role,
+                    'userId'=> $user->user_id,
+                ]
             ], 201);
 
         } catch (ValidationException $e) {
@@ -81,14 +90,21 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json([
-                'success'       => true,
-                'version'       => 'v1',
-                'access_token'  => $token,
-                'token_type'    => 'Bearer',
-                'user'          => $user
+                'success'     => true,
+                'version'     => 'v1',
+                'accessToken' => $token,
+                'tokenType'   => 'Bearer',
+                'user'        => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'role'  => $user->role,
+                    'userId'=> $user->user_id,
+                ]
             ]);
 
         } catch (ValidationException $e) {
@@ -128,9 +144,18 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         try {
+            $user = $request->user();
+
             return response()->json([
                 'success' => true,
-                'user'    => $request->user()
+                'user'    => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'role'  => $user->role,
+                    'userId'=> $user->user_id,
+                ]
             ]);
         } catch (Exception $e) {
             return response()->json([
