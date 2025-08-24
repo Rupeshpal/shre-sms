@@ -90,6 +90,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('student-previous-info', PreviousSchoolInfoController::class);
         Route::apiResource('previous-school-details', PreviousSchoolDetailController::class);
         Route::apiResource('student-leave-requests', StudentLeaveRequestController::class);
+        Route::apiResource('guardians-info', GuardiansController::class);
         Route::apiResource('exams', \App\Http\Controllers\API\V1\Exam\ExamController::class);
         Route::apiResource('exam-results', ExamResultController::class);
         Route::apiResource('exam-attendances', ExamAttendanceController::class);
