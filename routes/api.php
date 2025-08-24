@@ -38,6 +38,7 @@ use App\Http\Controllers\API\V1\Teacher\AddressController;
 use App\Http\Controllers\API\V1\Teacher\TeacherDocController;
 use App\Http\Controllers\API\V1\Teacher\TeacherTransportController;
 use App\Http\Controllers\API\V1\Teacher\PreviousSchoolInfoController;
+use App\Http\Controllers\API\V1\Student\GuardiansController;
 
 /*
 |--------------------------------------------------------------------------
