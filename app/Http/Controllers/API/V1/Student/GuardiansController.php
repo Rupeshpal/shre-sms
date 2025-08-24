@@ -23,6 +23,7 @@ class GuardiansController extends Controller
         return [
             'id' => $guardian->id,
             'studentId' => $guardian->student_id,
+            'studentName' => $guardian->student->first_name . ' '. $guardian->student->last_name ?? null,
             'relationType' => $guardian->relation_type,
             'name' => $guardian->name,
             'email' => $guardian->email,
