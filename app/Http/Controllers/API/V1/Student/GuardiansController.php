@@ -23,7 +23,7 @@ class GuardiansController extends Controller
         return [
             'id' => $guardian->id,
             'studentId' => $guardian->student_id,
-            'studentName' => $guardian->student->first_name . ' '. $guardian->student->last_name ?? null,
+            'studentName' => $guardian->student->first_name . ' ' . $guardian->student->last_name ?? null,
             'relationType' => $guardian->relation_type,
             'name' => $guardian->name,
             'email' => $guardian->email,
@@ -49,35 +49,46 @@ class GuardiansController extends Controller
         }
     }
 
+    /**
+     * Store multiple guardians in one request
+     */
     public function store(Request $request)
     {
         try {
             $validated = $request->validate([
                 'studentId' => 'required|exists:student_personal_info,id',
-                'relationType' => 'required|in:father,mother,local_guardian',
-                'name' => 'required|string|max:100',
-                'email' => 'nullable|email|max:150',
-                'phoneNumber' => 'nullable|string|max:20',
-                'occupation' => 'nullable|string|max:100',
-                'temporaryAddress' => 'nullable|string|max:255',
-                'permanentAddress' => 'nullable|string|max:255',
-                'nationality' => 'nullable|string|max:100',
-                'monthlyIncome' => 'nullable|integer',
-                'photo' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+                'guardians' => 'required|array|min:1',
+                'guardians.*.relationType' => 'required|in:father,mother,local_guardian',
+                'guardians.*.name' => 'required|string|max:100',
+                'guardians.*.email' => 'nullable|email|max:150',
+                'guardians.*.phoneNumber' => 'nullable|string|max:20',
+                'guardians.*.occupation' => 'nullable|string|max:100',
+                'guardians.*.temporaryAddress' => 'nullable|string|max:255',
+                'guardians.*.permanentAddress' => 'nullable|string|max:255',
+                'guardians.*.nationality' => 'nullable|string|max:100',
+                'guardians.*.monthlyIncome' => 'nullable|integer',
+                'guardians.*.photo' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
             ]);
 
-            $guardianData = $this->convertCamelToSnake($validated);
+            $createdGuardians = [];
 
-            if ($request->hasFile('photo')) {
-                $guardianData['photo_path'] = $request->file('photo')->store('guardians', 'public');
+            foreach ($validated['guardians'] as $guardianInput) {
+                $guardianData = $this->convertCamelToSnake($guardianInput);
+                $guardianData['student_id'] = $validated['studentId'];
+
+                // Handle photo upload if exists
+                if (isset($guardianInput['photo']) && $guardianInput['photo'] instanceof \Illuminate\Http\UploadedFile) {
+                    $guardianData['photo_path'] = $guardianInput['photo']->store('guardians', 'public');
+                }
+
+                $guardian = Guardian::create($guardianData);
+                $createdGuardians[] = $this->formatResponse($guardian);
             }
 
-            $guardian = Guardian::create($guardianData);
-
-            return response()->json($this->formatResponse($guardian), 201);
+            return response()->json($createdGuardians, 201);
 
         } catch (Exception $e) {
-            return response()->json(['error' => 'Failed to create guardian', 'message' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to create guardians', 'message' => $e->getMessage()], 500);
         }
     }
 
