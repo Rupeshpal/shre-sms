@@ -7,6 +7,7 @@ use App\Models\Student\StudentSibling;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class StudentSiblingController extends Controller
 {
@@ -25,8 +26,8 @@ class StudentSiblingController extends Controller
             'studentName'  => $sibling->student?->first_name . ' ' . $sibling->student?->last_name ?? null,
             'name'         => $sibling->name,
             'admissionNo'  => $sibling->admission_no,
-            'sectionId'      => $sibling->section,
-            'sectionName'        => $sibling->section,
+            'sectionId'    => $sibling->section,
+            'sectionName'  => $sibling->section,
             'rollNo'       => $sibling->roll_no,
             'createdAt'    => $sibling->created_at?->toIso8601String(),
             'updatedAt'    => $sibling->updated_at?->toIso8601String(),
@@ -35,87 +36,127 @@ class StudentSiblingController extends Controller
 
     public function index()
     {
-        $siblings = StudentSibling::all()->map(fn($sibling) => $this->formatResponse($sibling));
-        return response()->json($siblings);
+        try {
+            $siblings = StudentSibling::all()->map(fn($sibling) => $this->formatResponse($sibling));
+            return response()->json(['status' => true, 'data' => $siblings], 200);
+        } catch (Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $data = $this->convertCamelToSnake($request->all());
+        try {
+            $siblingsData = $request->all();
 
-        $validated = validator($data, [
-            'student_id'   => 'required|exists:student_personal_info,id',
-            'name'         => 'nullable|string|max:100',
-            'section'      => 'nullable|integer|max:50',
-            'roll_no'      => 'nullable|string|max:20',
-        ])->validate();
-
-        if (empty($validated['admission_no'])) {
-            $validated['admission_no'] = $this->generateUniqueAdmissionNumber();
-        } else {
-            if ($this->admissionNumberExists($validated['admission_no'])) {
-                return response()->json(['message' => 'The admission number already exists in student records.'], 422);
+            if (!is_array($siblingsData)) {
+                return response()->json(['status' => false, 'message' => 'Invalid input format, expected an array'], 422);
             }
+
+            $createdSiblings = [];
+
+            foreach ($siblingsData as $siblingData) {
+                $data = $this->convertCamelToSnake($siblingData);
+
+                $validated = validator($data, [
+                    'student_id'   => 'required|exists:student_personal_info,id',
+                    'name'         => 'nullable|string|max:100',
+                    'section'      => 'nullable|integer|max:50',
+                    'roll_no'      => 'nullable|string|max:20',
+                    'admission_no' => 'nullable|string|max:50',
+                ])->validate();
+
+                if (empty($validated['admission_no'])) {
+                    $validated['admission_no'] = $this->generateUniqueAdmissionNumber();
+                } else {
+                    if ($this->admissionNumberExists($validated['admission_no'])) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => "The admission number {$validated['admission_no']} already exists in student records."
+                        ], 422);
+                    }
+                }
+
+                $sibling = StudentSibling::create($validated);
+                $createdSiblings[] = $this->formatResponse($sibling);
+            }
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Siblings created successfully',
+                'data'    => $createdSiblings
+            ], 201);
+
+        } catch (Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
-
-        $sibling = StudentSibling::create($validated);
-
-        return response()->json([
-            'message' => 'Sibling created successfully',
-            'data'    => $this->formatResponse($sibling)
-        ], 201);
     }
 
     public function show($id)
     {
-        $sibling = StudentSibling::find($id);
-        if (!$sibling) {
-            return response()->json(['message' => 'Sibling not found'], 404);
+        try {
+            $sibling = StudentSibling::find($id);
+            if (!$sibling) {
+                return response()->json(['status' => false, 'message' => 'Sibling not found'], 404);
+            }
+            return response()->json(['status' => true, 'data' => $this->formatResponse($sibling)], 200);
+        } catch (Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
-        return response()->json($this->formatResponse($sibling));
     }
 
     public function update(Request $request, $id)
     {
-        $sibling = StudentSibling::find($id);
-        if (!$sibling) {
-            return response()->json(['message' => 'Sibling not found'], 404);
+        try {
+            $sibling = StudentSibling::find($id);
+            if (!$sibling) {
+                return response()->json(['status' => false, 'message' => 'Sibling not found'], 404);
+            }
+
+            $data = $this->convertCamelToSnake($request->all());
+
+            $validated = validator($data, [
+                'student_id'   => 'sometimes|required|exists:student_personal_info,id',
+                'name'         => 'nullable|string|max:100',
+                'admission_no' => 'nullable|string|max:50',
+                'section'      => 'nullable|string|max:50',
+                'roll_no'      => 'nullable|string|max:20',
+            ])->validate();
+
+            if (!empty($validated['admission_no'])
+                && $validated['admission_no'] !== $sibling->admission_no
+                && $this->admissionNumberExists($validated['admission_no'])) {
+                return response()->json(['status' => false, 'message' => 'The admission number already exists in student records.'], 422);
+            }
+
+            $sibling->update($validated);
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Sibling updated successfully',
+                'data'    => $this->formatResponse($sibling)
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
-
-        $data = $this->convertCamelToSnake($request->all());
-
-        $validated = validator($data, [
-            'student_id'   => 'sometimes|required|exists:student_personal_info,id',
-            'name'         => 'nullable|string|max:100',
-            'admission_no' => 'nullable|string|max:50',
-            'section'      => 'nullable|string|max:50',
-            'roll_no'      => 'nullable|string|max:20',
-        ])->validate();
-
-        if (!empty($validated['admission_no'])
-            && $validated['admission_no'] !== $sibling->admission_no
-            && $this->admissionNumberExists($validated['admission_no'])) {
-            return response()->json(['message' => 'The admission number already exists in student records.'], 422);
-        }
-
-        $sibling->update($validated);
-
-        return response()->json([
-            'message' => 'Sibling updated successfully',
-            'data'    => $this->formatResponse($sibling)
-        ]);
     }
 
     public function destroy($id)
     {
-        $sibling = StudentSibling::find($id);
-        if (!$sibling) {
-            return response()->json(['message' => 'Sibling not found'], 404);
+        try {
+            $sibling = StudentSibling::find($id);
+            if (!$sibling) {
+                return response()->json(['status' => false, 'message' => 'Sibling not found'], 404);
+            }
+
+            $sibling->delete();
+
+            return response()->json(['status' => true, 'message' => 'Sibling deleted successfully'], 200);
+
+        } catch (Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
-
-        $sibling->delete();
-
-        return response()->json(['message' => 'Sibling deleted successfully']);
     }
 
     private function generateUniqueAdmissionNumber($length = 8)

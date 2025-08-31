@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\API\V1\Student;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -49,9 +48,7 @@ class GuardiansController extends Controller
         }
     }
 
-    /**
-     * Store multiple guardians in one request
-     */
+
     public function store(Request $request)
     {
         try {
@@ -76,7 +73,6 @@ class GuardiansController extends Controller
                 $guardianData = $this->convertCamelToSnake($guardianInput);
                 $guardianData['student_id'] = $validated['studentId'];
 
-                // Handle photo upload if exists
                 if (isset($guardianInput['photo']) && $guardianInput['photo'] instanceof \Illuminate\Http\UploadedFile) {
                     $guardianData['photo_path'] = $guardianInput['photo']->store('guardians', 'public');
                 }
