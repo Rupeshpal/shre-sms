@@ -35,6 +35,7 @@ class Exam extends Model
     'exam_type',
     'pass_mark',
     'full_mark',
+    'end_date',
     'start_time',
     'duration',
     'room_no',
