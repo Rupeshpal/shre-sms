@@ -28,7 +28,8 @@ class StudentSiblingController extends Controller
             'admissionNo'  => $sibling->admission_no,
             'sectionId'    => $sibling->section,
             'sectionName'  => $sibling->section,
-            'rollNo'       => $sibling->roll_no,
+            'classId'      => $sibling->class_id,
+            'className' => optional($sibling->class)->class_name,
             'createdAt'    => $sibling->created_at?->toIso8601String(),
             'updatedAt'    => $sibling->updated_at?->toIso8601String(),
         ];
@@ -62,7 +63,7 @@ class StudentSiblingController extends Controller
                     'student_id'   => 'required|exists:student_personal_info,id',
                     'name'         => 'nullable|string|max:100',
                     'section'      => 'nullable|integer|max:50',
-                    'roll_no'      => 'nullable|string|max:20',
+                    'class_id'      => 'nullable|integer',
                     'admission_no' => 'nullable|string|max:50',
                 ])->validate();
 
@@ -120,7 +121,7 @@ class StudentSiblingController extends Controller
                 'name'         => 'nullable|string|max:100',
                 'admission_no' => 'nullable|string|max:50',
                 'section'      => 'nullable|string|max:50',
-                'roll_no'      => 'nullable|string|max:20',
+                'class_id'      => 'nullable|integer',
             ])->validate();
 
             if (!empty($validated['admission_no'])

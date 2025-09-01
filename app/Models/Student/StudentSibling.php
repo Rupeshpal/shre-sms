@@ -14,13 +14,14 @@ class StudentSibling extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'section' => 'integer',
+        'class_id' => 'integer',
     ];
     protected $fillable = [
         'student_id',
         'name',
         'admission_no',
         'section',
-        'roll_no',
+        'class_id',
     ];
 
     public function student()
@@ -29,5 +30,8 @@ class StudentSibling extends Model
     }
     public function section(){
         return $this->belongsTo(\App\Models\Section\Section::class, 'section');
+    }
+    public function class(){
+        return $this->belongsTo(\App\Models\Classes\Classes::class, 'class_id');
     }
 }
