@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\API\V1\Teacher;
-
 use App\Http\Controllers\Controller;
 use App\Models\Teacher\TeacherPreviousSchoolInfo;
 use Illuminate\Http\Request;
@@ -20,7 +19,7 @@ class PreviousSchoolInfoController extends Controller
     {
         return [
             'id' => $info->id,
-            'studentId' => $info->student_id,
+            'teacherId' => $info->teacher_id,
             'schoolName' => $info->school_name,
             'location' => $info->location,
             'affiliationBoard' => $info->affiliation_board,
@@ -67,7 +66,7 @@ class PreviousSchoolInfoController extends Controller
 
     public function show($id)
     {
-        $info = PreviousSchoolInfo::with('student')->find($id);
+        $info = PreviousSchoolInfo::with('teacher')->find($id);
 
         if (!$info) {
             return response()->json([
@@ -97,7 +96,7 @@ class PreviousSchoolInfoController extends Controller
         $input = $this->convertCamelToSnake($request->all());
 
         $validated = validator($input, [
-            'student_id' => 'nullable|exists:students,id',
+            'teacher_id' => 'nullable|exists:teachers,id',
             'school_name' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'affiliation_board' => 'nullable|string|max:255',

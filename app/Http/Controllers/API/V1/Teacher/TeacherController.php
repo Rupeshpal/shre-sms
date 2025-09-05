@@ -51,8 +51,6 @@ class TeacherController extends Controller
                 'house'            => 'nullable|string|max:50',
                 'motherTongue'     => 'nullable|string|max:50',
                 'status'           => 'nullable|boolean',
-
-                // assignments
                 'assignments'       => 'nullable|array',
                 'assignments.*.subjectId' => 'required|integer',
                 'assignments.*.classId'   => 'required|integer',
@@ -83,7 +81,6 @@ class TeacherController extends Controller
 
             $teacher = Teacher::create($data);
 
-            // save assignments
             if (!empty($validated['assignments'])) {
                 foreach ($validated['assignments'] as $assignment) {
                     $teacher->assignments()->create([
@@ -243,7 +240,7 @@ class TeacherController extends Controller
             'updatedAt'       => optional($teacher->updated_at)->toIso8601String(),
         ];
     }
-    
+
 
     protected function generateTeacherCode()
     {
