@@ -87,7 +87,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('student-siblings', StudentSiblingController::class);
         Route::apiResource('student-transports', StudentTransportController::class);
         Route::apiResource('student-addresses', StudentAddressController::class);
-        Route::apiResource('teacher-previous-info', PreviousTeacherInfoController::class);
+        Route::apiResource('teacher-previous-info', PreviousSchoolInfoController::class);
         Route::apiResource('previous-school-details', PreviousSchoolDetailController::class);
         Route::apiResource('student-leave-requests', StudentLeaveRequestController::class);
         Route::apiResource('guardians-info', GuardiansController::class);
