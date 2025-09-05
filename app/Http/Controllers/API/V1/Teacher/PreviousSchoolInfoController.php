@@ -1,12 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\API\V1\Teacher;
+
 use App\Http\Controllers\Controller;
-use App\Models\Teacher\PreviousTeacherInfo;
+use App\Models\Teacher\PreviousSchoolInfo;  
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class PreviousTeacherInfoController extends Controller
+class PreviousSchoolInfoController extends Controller
 {
     private function convertCamelToSnake(array $input): array
     {
@@ -15,7 +16,7 @@ class PreviousTeacherInfoController extends Controller
         })->toArray();
     }
 
-    private function formatResponse(PreviousTeacherInfo $info): array
+    private function formatResponse(PreviousSchoolInfo $info): array
     {
         return [
             'id' => $info->id,
@@ -31,8 +32,7 @@ class PreviousTeacherInfoController extends Controller
 
     public function index()
     {
-        
-        $infos = PreviousTeacherInfo::with('student')->get();
+        $infos = PreviousSchoolInfo::with('teacher')->get();  
 
         $data = $infos->map(fn($info) => $this->formatResponse($info));
 
@@ -55,7 +55,7 @@ class PreviousTeacherInfoController extends Controller
             'school_contact_number' => 'nullable|string|max:20',
         ])->validate();
 
-        $info = PreviousTeacherInfo::create($validated);
+        $info = PreviousSchoolInfo::create($validated);
 
         return response()->json([
             'status' => true,
@@ -66,7 +66,7 @@ class PreviousTeacherInfoController extends Controller
 
     public function show($id)
     {
-        $info = PreviousTeacherInfo::with('teacher')->find($id);
+        $info = PreviousSchoolInfo::with('teacher')->find($id);
 
         if (!$info) {
             return response()->json([
@@ -84,7 +84,7 @@ class PreviousTeacherInfoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $info = PreviousTeacherInfo::find($id);
+        $info = PreviousSchoolInfo::find($id);
 
         if (!$info) {
             return response()->json([
@@ -114,7 +114,7 @@ class PreviousTeacherInfoController extends Controller
 
     public function destroy($id)
     {
-        $info = PreviousTeacherInfo::find($id);
+        $info = PreviousSchoolInfo::find($id);
 
         if (!$info) {
             return response()->json([
