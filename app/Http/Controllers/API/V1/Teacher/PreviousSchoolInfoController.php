@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Teacher\PreviousSchoolInfo;  
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Exception;
 
 class PreviousSchoolInfoController extends Controller
 {
@@ -32,102 +34,156 @@ class PreviousSchoolInfoController extends Controller
 
     public function index()
     {
-        $infos = PreviousSchoolInfo::with('teacher')->get();  
+        try {
+            $infos = PreviousSchoolInfo::with('teacher')->get();
 
-        $data = $infos->map(fn($info) => $this->formatResponse($info));
+            $data = $infos->map(fn($info) => $this->formatResponse($info));
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Previous school records fetched successfully',
-            'data' => $data
-        ]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Previous school records fetched successfully',
+                'data' => $data
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to fetch records',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request)
     {
-        $input = $this->convertCamelToSnake($request->all());
+        try {
+            $input = $this->convertCamelToSnake($request->all());
 
-        $validated = validator($input, [
-            'teacher_id' => 'required|exists:teachers,id',
-            'school_name' => 'required|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'affiliation_board' => 'nullable|string|max:255',
-            'school_contact_number' => 'nullable|string|max:20',
-        ])->validate();
+            $validated = validator($input, [
+                'teacher_id' => 'required|exists:teachers,id',
+                'school_name' => 'required|string|max:255',
+                'location' => 'nullable|string|max:255',
+                'affiliation_board' => 'nullable|string|max:255',
+                'school_contact_number' => 'nullable|string|max:20',
+            ])->validate();
 
-        $info = PreviousSchoolInfo::create($validated);
+            $info = PreviousSchoolInfo::create($validated);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Previous school record created successfully',
-            'data' => $this->formatResponse($info)
-        ], 201);
+            return response()->json([
+                'status' => true,
+                'message' => 'Previous school record created successfully',
+                'data' => $this->formatResponse($info)
+            ], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to create record',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show($id)
     {
-        $info = PreviousSchoolInfo::with('teacher')->find($id);
+        try {
+            $info = PreviousSchoolInfo::with('teacher')->find($id);
 
-        if (!$info) {
+            if (!$info) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Record not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Record fetched successfully',
+                'data' => $this->formatResponse($info)
+            ]);
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Record not found'
-            ], 404);
+                'message' => 'Failed to fetch record',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Record fetched successfully',
-            'data' => $this->formatResponse($info)
-        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $info = PreviousSchoolInfo::find($id);
+        try {
+            $info = PreviousSchoolInfo::find($id);
 
-        if (!$info) {
+            if (!$info) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Record not found'
+                ], 404);
+            }
+
+            $input = $this->convertCamelToSnake($request->all());
+
+            $validated = validator($input, [
+                'teacher_id' => 'nullable|exists:teachers,id',
+                'school_name' => 'nullable|string|max:255',
+                'location' => 'nullable|string|max:255',
+                'affiliation_board' => 'nullable|string|max:255',
+                'school_contact_number' => 'nullable|string|max:20',
+            ])->validate();
+
+            $info->update($validated);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Record updated successfully',
+                'data' => $this->formatResponse($info)
+            ]);
+
+        } catch (ValidationException $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Record not found'
-            ], 404);
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update record',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $input = $this->convertCamelToSnake($request->all());
-
-        $validated = validator($input, [
-            'teacher_id' => 'nullable|exists:teachers,id',
-            'school_name' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'affiliation_board' => 'nullable|string|max:255',
-            'school_contact_number' => 'nullable|string|max:20',
-        ])->validate();
-
-        $info->update($validated);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Record updated successfully',
-            'data' => $this->formatResponse($info)
-        ]);
     }
 
     public function destroy($id)
     {
-        $info = PreviousSchoolInfo::find($id);
+        try {
+            $info = PreviousSchoolInfo::find($id);
 
-        if (!$info) {
+            if (!$info) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Record not found'
+                ], 404);
+            }
+
+            $info->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Record deleted successfully'
+            ]);
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Record not found'
-            ], 404);
+                'message' => 'Failed to delete record',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $info->delete();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Record deleted successfully'
-        ]);
     }
 }
