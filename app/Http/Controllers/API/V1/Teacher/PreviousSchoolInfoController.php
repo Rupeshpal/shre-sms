@@ -23,6 +23,7 @@ class PreviousSchoolInfoController extends Controller
         return [
             'id' => $info->id,
             'teacherId' => $info->teacher_id,
+            'teacherName' => $info->teacher->first_name . ' ' . $info->teacher->last_name,
             'schoolName' => $info->school_name,
             'location' => $info->location,
             'affiliationBoard' => $info->affiliation_board,
