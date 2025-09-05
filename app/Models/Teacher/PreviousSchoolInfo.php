@@ -16,4 +16,9 @@ class PreviousSchoolInfo extends Model
         'affiliation_board',
         'school_contact_number',
     ];
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class, 'teacher_id');
+    }
 }
