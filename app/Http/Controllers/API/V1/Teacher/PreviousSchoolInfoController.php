@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API\V1\Teacher;
 use App\Http\Controllers\Controller;
-use App\Models\Teacher\TeacherPreviousSchoolInfo;
+use App\Models\Teacher\PreviousTeacherInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
