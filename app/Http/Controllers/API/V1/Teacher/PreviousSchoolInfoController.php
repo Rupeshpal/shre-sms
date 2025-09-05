@@ -6,7 +6,7 @@ use App\Models\Teacher\PreviousTeacherInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class PreviousSchoolInfoController extends Controller
+class PreviousTeacherInfoController extends Controller
 {
     private function convertCamelToSnake(array $input): array
     {
@@ -15,7 +15,7 @@ class PreviousSchoolInfoController extends Controller
         })->toArray();
     }
 
-    private function formatResponse(PreviousSchoolInfo $info): array
+    private function formatResponse(PreviousTeacherInfo $info): array
     {
         return [
             'id' => $info->id,
@@ -32,7 +32,7 @@ class PreviousSchoolInfoController extends Controller
     public function index()
     {
         
-        $infos = PreviousSchoolInfo::with('student')->get();
+        $infos = PreviousTeacherInfo::with('student')->get();
 
         $data = $infos->map(fn($info) => $this->formatResponse($info));
 
@@ -55,7 +55,7 @@ class PreviousSchoolInfoController extends Controller
             'school_contact_number' => 'nullable|string|max:20',
         ])->validate();
 
-        $info = PreviousSchoolInfo::create($validated);
+        $info = PreviousTeacherInfo::create($validated);
 
         return response()->json([
             'status' => true,
@@ -66,7 +66,7 @@ class PreviousSchoolInfoController extends Controller
 
     public function show($id)
     {
-        $info = PreviousSchoolInfo::with('teacher')->find($id);
+        $info = PreviousTeacherInfo::with('teacher')->find($id);
 
         if (!$info) {
             return response()->json([
@@ -84,7 +84,7 @@ class PreviousSchoolInfoController extends Controller
 
     public function update(Request $request, $id)
     {
-        $info = PreviousSchoolInfo::find($id);
+        $info = PreviousTeacherInfo::find($id);
 
         if (!$info) {
             return response()->json([
@@ -114,7 +114,7 @@ class PreviousSchoolInfoController extends Controller
 
     public function destroy($id)
     {
-        $info = PreviousSchoolInfo::find($id);
+        $info = PreviousTeacherInfo::find($id);
 
         if (!$info) {
             return response()->json([
